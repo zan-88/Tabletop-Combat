@@ -1,6 +1,6 @@
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
-import React, { useState, useStyles } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Adjust from "@material-ui/icons/Adjust";
 import Build from "@material-ui/icons/Build";
 import CloudUploadIcon from "@material-ui/icons/CloudUpload";
@@ -8,16 +8,20 @@ import AccountCircleIcon from "@material-ui/icons/AccountCircle";
 import Map from "./Map";
 import TokensPanel from "./TokensPanel";
 import { storage, db } from "../firebase";
-import dragMap from "../images/DragMap.png";
 import styled from "styled-components";
 import useDragFile from "../hooks/use-dragfile";
 import { useDropzone } from "react-dropzone";
+import Tools from "./Tools";
+import GridTool from "./GridTool";
 
-function Combat() {
+import grid from "../images/grid.png";
+
+function Combat({ url, setUrl }) {
   const [value, setValue] = useState(0);
 
-  const [image, setImage] = useState(null);
-  const [url, setUrl] = useState("");
+  const [image, setImage] = useState("");
+
+  const notInitial = useRef(false);
 
   const { map: tempImg } = useDragFile("dragArea");
 
@@ -29,9 +33,16 @@ function Combat() {
     },
     onDrop: (acceptedFiles) => {
       setImage(acceptedFiles[0]);
-      handleUpload();
     },
   });
+
+  useEffect(() => {
+    if (notInitial.current) {
+      handleUpload();
+    } else {
+      notInitial.current = true;
+    }
+  }, [image]);
 
   const img = new Image();
 
@@ -47,7 +58,7 @@ function Combat() {
   };
 
   const handleUpload = () => {
-    const uploadTask = storage.ref(`map/${image.path}`).put(image);
+    const uploadTask = storage.ref(`map/${image.name}`).put(image);
     uploadTask.on(
       "state_changed",
       (snapshot) => {},
@@ -93,8 +104,10 @@ function Combat() {
           display: "flex",
           flexDirection: "column",
           backgroundColor: "#940a0a",
+          zIndex: "100000",
         }}
       >
+        <GridTool />
         <Tabs
           style={{ backgroundColor: "black" }}
           variant="scrollable"
@@ -112,17 +125,18 @@ function Combat() {
           />
           <Tab label="Item Three" />
         </Tabs>
+        {value == 0 && <Tools />}
       </div>
       {url === "" ? (
         <MapSection>
           <MapBorder id="dragArea" {...getRootProps()}>
-            <input {...getInputProps()} />
+            <input style={{ width: "100%" }} {...getInputProps()} />
             <MapText>Choose Map Or Drag It Here</MapText>
             <CloudUploadIcon style={Cloud} />
           </MapBorder>
         </MapSection>
       ) : (
-        <Map />
+        <Map imageUrl={url} />
       )}
     </div>
   );
@@ -152,6 +166,7 @@ const MapBorder = styled.div`
   height: 80%;
   color: #940a0a;
   opacity: 50%;
+  z-index: 1000000;
 `;
 
 const MapText = styled.div`

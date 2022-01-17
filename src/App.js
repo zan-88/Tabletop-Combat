@@ -7,9 +7,11 @@ import Build from "@material-ui/icons/Build";
 import AccountCircleIcon from "@material-ui/icons/AccountCircle";
 import Map from "./components/Map";
 import Combat from "./components/Combat";
+import useDraggable from "./hooks/use-draggable";
 
 function App() {
   const [value, setValue] = useState(0);
+  const [url, setUrl] = useState("");
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -24,10 +26,13 @@ function App() {
         backgroundColor: "#940a0a",
         display: "flex",
         flexDirection: "column",
+        position: "relative",
+        zIndex: "10000000",
       }}
     >
+      {url === "" && <div id="grid"></div>}
       <Tabs
-        style={{ backgroundColor: "black", height: "50px" }}
+        style={{ backgroundColor: "black", height: "50px", zIndex: "1000" }}
         variant="scrollable"
         value={value}
         onChange={handleChange}
@@ -43,7 +48,7 @@ function App() {
         />
         <Tab label="Item Three" />
       </Tabs>
-      {value === 0 && <Combat />}
+      {value === 0 && <Combat url={url} setUrl={setUrl} />}
     </div>
   );
 }
