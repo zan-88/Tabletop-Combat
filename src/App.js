@@ -12,10 +12,10 @@ import useDraggable from "./hooks/use-draggable";
 function App() {
   const [value, setValue] = useState(0);
   const [url, setUrl] = useState("");
+  const [urls, setUrls] = useState([]);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
-    console.log(newValue);
   };
   return (
     <div
@@ -48,7 +48,9 @@ function App() {
         />
         <Tab label="Item Three" />
       </Tabs>
-      {value === 0 && <Combat url={url} setUrl={setUrl} />}
+      {value === 0 && (
+        <Combat url={url} setUrl={setUrl} urls={urls} setUrls={setUrls} />
+      )}
     </div>
   );
 }

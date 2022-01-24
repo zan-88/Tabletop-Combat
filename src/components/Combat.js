@@ -1,10 +1,10 @@
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
 import React, { useState, useEffect, useRef } from "react";
-import Adjust from "@material-ui/icons/Adjust";
-import Build from "@material-ui/icons/Build";
-import CloudUploadIcon from "@material-ui/icons/CloudUpload";
-import AccountCircleIcon from "@material-ui/icons/AccountCircle";
+import Adjust from "@mui/icons-material/Adjust";
+import Build from "@mui/icons-material/Build";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import Map from "./Map";
 import TokensPanel from "./TokensPanel";
 import { storage, db } from "../firebase";
@@ -12,18 +12,70 @@ import styled from "styled-components";
 import useDragFile from "../hooks/use-dragfile";
 import { useDropzone } from "react-dropzone";
 import Tools from "./Tools";
+import Grid4x4Icon from "@mui/icons-material/Grid4x4";
 import GridTool from "./GridTool";
 
 import grid from "../images/grid.png";
+import draggable from "../Functions/draggable";
+import Token from "./Token";
 
-function Combat({ url, setUrl }) {
+function Combat({ url, setUrl, urls, setUrls }) {
   const [value, setValue] = useState(0);
 
   const [image, setImage] = useState("");
 
+  const [val, setVal] = useState(1);
+
   const notInitial = useRef(false);
 
-  const { map: tempImg } = useDragFile("dragArea");
+  const [initDim, setInitDim] = useState({ w: 0, h: 0 });
+  const [imgDim, setImgDim] = useState({ w: "", h: "" });
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [loc, setLoc] = useState({ x: 0, y: 0 });
+  const [tile, setTile] = useState(0);
+
+  const [tokens, setTokens] = useState([]);
+  const [tileSize, setTileSize] = useState(44);
+
+  useDragFile("dragArea");
+
+  //stores id for grid and changes if grid movement is not required
+  const [grid, setGrid] = useState({ w: 2000, h: 1000 });
+
+  function tokenHandle(url) {
+    let src = url;
+    let val = tokens.length;
+    let token = document.getElementById("token_" + val);
+    console.log(token.offsetLeft + " | " + token.offsetTop);
+    setTokens([
+      ...tokens,
+      {
+        x: token.offsetLeft,
+        y: token.offsetTop,
+        url: src,
+        id: "char_" + val,
+        key: val,
+        dim: token.offsetWidth,
+      },
+    ]);
+  }
+
+  function fitImage() {
+    let container = document.getElementById("mapBack");
+    let img = document.getElementById("ugh");
+    if (
+      container.offsetWidth - img.width <
+      container.offsetHeight - img.height
+    ) {
+      let hVal = (img.height * container.offsetWidth) / img.width;
+      setImgDim({ w: `${container.offsetWidth}px`, h: `${hVal}px` });
+      setInitDim({ w: container.offsetWidth, h: hVal });
+    } else {
+      let wVal = (img.width * container.offsetHeight) / img.height;
+      setImgDim({ w: `${wVal}px`, h: `${container.offsetHeight}px` });
+      setInitDim({ w: wVal, h: container.offsetHeight });
+    }
+  }
 
   const { getRootProps, getInputProps } = useDropzone({
     accept: "image/*",
@@ -48,7 +100,6 @@ function Combat({ url, setUrl }) {
 
   const handleChangeTab = (event, newValue) => {
     setValue(newValue);
-    console.log(newValue);
   };
 
   const handleChangeMap = (e) => {
@@ -73,7 +124,9 @@ function Combat({ url, setUrl }) {
           .then((url) => {
             setUrl(url);
             img.src = url;
-            console.log(url);
+            img.onload = function () {
+              setIsLoaded(true);
+            };
             db.collection("map")
               .doc("link")
               .set({
@@ -90,55 +143,87 @@ function Combat({ url, setUrl }) {
     );
   };
   return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        backgroundColor: "white",
-        height: "100%",
-      }}
-    >
+    <>
       <div
         style={{
-          flexBasis: "15%",
           display: "flex",
-          flexDirection: "column",
-          backgroundColor: "#940a0a",
-          zIndex: "100000",
+          justifyContent: "center",
+          backgroundColor: "white",
+          height: "100%",
         }}
       >
-        <GridTool />
-        <Tabs
-          style={{ backgroundColor: "black" }}
-          variant="scrollable"
-          value={value}
-          onChange={handleChangeTab}
-          aria-label="simple tabs example"
+        <div
+          id="selection"
+          style={{
+            flexBasis: "15%",
+            display: "flex",
+            flexDirection: "column",
+            backgroundColor: "#940a0a",
+            zIndex: "100000",
+          }}
         >
-          <Tab
-            style={{ minWidth: "50%" }}
-            icon={<AccountCircleIcon style={{ color: "white" }} />}
+          <Tabs
+            style={{ backgroundColor: "black" }}
+            variant="scrollable"
+            value={value}
+            onChange={handleChangeTab}
+            aria-label="simple tabs example"
+          >
+            <Tab
+              style={{ minWidth: "33%" }}
+              icon={<Grid4x4Icon style={{ color: "white" }} />}
+            />
+            <Tab
+              icon={<AccountCircleIcon style={{ color: "white" }} />}
+              style={{ minWidth: "33%" }}
+            />
+            <Tab
+              icon={<Build style={{ color: "white" }} />}
+              style={{ minWidth: "33%" }}
+            />
+          </Tabs>
+          {value === 0 && <GridTool setGrid={setGrid} setTile={setTileSize} />}
+          {value === 1 && (
+            <TokensPanel
+              urls={urls}
+              setUrls={setUrls}
+              tokenHandle={tokenHandle}
+            />
+          )}
+          {value === 2 && <Tools />}
+        </div>
+        {url === "" ? (
+          <MapSection>
+            <MapBorder id="dragArea" {...getRootProps()}>
+              <input style={{ width: "100%" }} {...getInputProps()} />
+              <MapText>Choose Map Or Drag It Here</MapText>
+              <CloudUploadIcon style={Cloud} />
+            </MapBorder>
+          </MapSection>
+        ) : (
+          <Map
+            imageUrl={url}
+            gridId={grid}
+            val={val}
+            loc={loc}
+            dim={imgDim}
+            fitImage={fitImage}
+            setLoc={setLoc}
+            isLoaded={isLoaded}
+            gridVal={grid}
+            tokens={tokens}
           />
-          <Tab
-            icon={<Build style={{ color: "white" }} />}
-            style={{ minWidth: "50%" }}
-          />
-          <Tab label="Item Three" />
-        </Tabs>
-        {value == 0 && <Tools />}
+        )}
       </div>
-      {url === "" ? (
-        <MapSection>
-          <MapBorder id="dragArea" {...getRootProps()}>
-            <input style={{ width: "100%" }} {...getInputProps()} />
-            <MapText>Choose Map Or Drag It Here</MapText>
-            <CloudUploadIcon style={Cloud} />
-          </MapBorder>
-        </MapSection>
-      ) : (
-        <Map imageUrl={url} />
-      )}
-    </div>
+      {tokens.map((token, i) => (
+        <Token
+          dim={tileSize}
+          token={token}
+          tokens={tokens}
+          setTokens={setTokens}
+        />
+      ))}
+    </>
   );
 }
 
@@ -166,7 +251,6 @@ const MapBorder = styled.div`
   height: 80%;
   color: #940a0a;
   opacity: 50%;
-  z-index: 1000000;
 `;
 
 const MapText = styled.div`

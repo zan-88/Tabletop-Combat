@@ -2,8 +2,6 @@ import { useState, useEffect } from "react";
 import React from "react";
 
 export default function useDragFile(id) {
-  const [map, setMap] = useState("");
-
   useEffect(() => {
     const area = document.getElementById(id);
     if (area !== null) {
@@ -30,6 +28,4 @@ export default function useDragFile(id) {
     e.preventDefault();
     el.style.opacity = "50%";
   }
-
-  return map;
 }
