@@ -8,8 +8,9 @@ import styled from "styled-components";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import useDraggable from "../hooks/use-draggable";
 import draggable from "../Functions/draggable";
+import Token from "./Token";
 
-function TokensPanel({ urls, setUrls, tokenHandle }) {
+function TokensPanel({ urls, setUrls, newToken }) {
   const [activeToken, setActiveToken] = useState("");
   const [editState, setEditState] = useState(0);
   const notInitial = useRef(false);
@@ -20,6 +21,7 @@ function TokensPanel({ urls, setUrls, tokenHandle }) {
   let selecW = selec.offsetWidth / 2.5;
 
   const [images, setImages] = useState([]);
+  const [tokens, setTokens] = useState([]);
 
   const { getRootProps, getInputProps } = useDropzone({
     accept: "image/*",
@@ -36,7 +38,7 @@ function TokensPanel({ urls, setUrls, tokenHandle }) {
 
   useEffect(() => {
     if (notInitial.current) {
-      tokenHandle(urls[urls.length - 1]);
+      newToken(urls[urls.length - 1]);
     } else {
       notInitial.current = true;
     }
@@ -105,17 +107,7 @@ function TokensPanel({ urls, setUrls, tokenHandle }) {
           <CloudUploadIcon style={Cloud} />
         </TokenBorder>
       </TokenDrag>
-      <TokenBar id="tokenBar">
-        {urls.map((image, i) => (
-          <img
-            key={i}
-            id={`token_${i}`}
-            src={image}
-            alt="token"
-            style={{ margin: "3%", width: selecW, height: selecW }}
-          />
-        ))}
-      </TokenBar>
+      <TokenBar id="tokenBar" />
     </TokenContainer>
   );
 }
@@ -158,7 +150,7 @@ const TokenBorder = styled.div`
   height: 90%;
   color: white;
   opacity: 50%;
-  z-index: 1000000;
+  z-index: 100;
 `;
 
 const TokenText = styled.div`

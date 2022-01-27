@@ -2,11 +2,10 @@ import { logDOM } from "@testing-library/react";
 import { useState, useEffect } from "react";
 
 export default function useGridBounds(
-  id,
+  token,
   initPos,
   borderID,
   setDim,
-  initDim,
   tileDim,
   newToken,
   removeToken
@@ -15,12 +14,13 @@ export default function useGridBounds(
     x: initPos.x,
     y: initPos.y,
   });
-  const [prev, setPrev] = useState(initPos);
+
   let inMouse = { x: null, y: null };
   let offset = { x: null, y: null };
+  let initial = initPos;
 
   useEffect(() => {
-    const drag = document.getElementById(id);
+    const drag = document.getElementById(token.id);
 
     const down = function (e) {
       const border = document.getElementById(borderID);
@@ -37,8 +37,10 @@ export default function useGridBounds(
             e.clientY < y + height
           )
         ) {
-          newToken();
+          newToken(token.url);
         }
+      } else {
+        newToken(token.url);
       }
       inMouse = {
         x: e.clientX,
@@ -70,22 +72,20 @@ export default function useGridBounds(
             e.clientY < y + height
           )
         ) {
-          setPosition(prev);
-          removeToken();
+          setDim(token.dim);
+          console.log("KEY: " + token.key);
         } else {
+          setDim(tileDim);
           console.log(position);
           console.log(initPos);
-          if (e.clientX !== initPos.x || e.clientY !== initPos.y) {
-            console.log(Math.floor(e.clientX / tileDim));
-            setPosition({
-              x: Math.floor((e.clientX - x) / tileDim) * tileDim + x,
-              y: Math.floor((e.clientY - y) / tileDim) * tileDim + y,
-            });
-            setPrev(position);
-          }
+          console.log(Math.floor(e.clientX / tileDim));
+          setPosition({
+            x: Math.floor((e.clientX - x) / tileDim) * tileDim + x,
+            y: Math.floor((e.clientY - y) / tileDim) * tileDim + y,
+          });
         }
       } else {
-        setPosition(prev);
+        //setPosition(initial);
       }
       document.body.removeEventListener("mousemove", move);
       document.body.removeEventListener("mouseup", up);
@@ -113,9 +113,9 @@ export default function useGridBounds(
             e.clientY < y + height
           )
         ) {
-          setDim(initDim);
+          //setDim(token.dim);
         } else {
-          setDim(tileDim);
+          //setDim(tileDim);
         }
       }
     }

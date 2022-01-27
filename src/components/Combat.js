@@ -42,22 +42,59 @@ function Combat({ url, setUrl, urls, setUrls }) {
   //stores id for grid and changes if grid movement is not required
   const [grid, setGrid] = useState({ w: 2000, h: 1000 });
 
-  function tokenHandle(url) {
-    let src = url;
-    let val = tokens.length;
-    let token = document.getElementById("token_" + val);
-    console.log(token.offsetLeft + " | " + token.offsetTop);
-    setTokens([
+  // function tokenHandle(url) {
+  //   let src = url;
+  //   let val = tokens.length;
+  //   let token = document.getElementById("token_" + val);
+
+  //   console.log(token.offsetLeft + " | " + token.offsetTop);
+  //   setTokens([
+  //     ...tokens,
+  //     {
+  //       x: token.offsetLeft,
+  //       y: token.offsetTop,
+  //       url: src,
+  //       id: "char_" + val,
+  //       key: val,
+  //       dim: token.offsetWidth,
+  //     },
+  //   ]);
+  // }
+
+  function newToken(url) {
+    let val = urls.findIndex(function (temp) {
+      return temp === url;
+    });
+    let panelLoc = document.getElementById("tokenBar");
+
+    let width = panelLoc.offsetWidth;
+    let tokWidth = width / 2 - 0.05 * width;
+    let height = panelLoc.offsetHeight;
+    let x =
+      val % 2 === 0
+        ? panelLoc.offsetLeft + 0.05 * width
+        : panelLoc.offsetLeft + width - (0.05 * width + tokWidth);
+    let y = panelLoc.offsetTop + 0.05 * height + tokWidth * ((val + 1) / 2);
+    console.log("LEN: " + tokens.length);
+    setTokens((tokens) => [
       ...tokens,
       {
-        x: token.offsetLeft,
-        y: token.offsetTop,
-        url: src,
-        id: "char_" + val,
-        key: val,
-        dim: token.offsetWidth,
+        x: x,
+        y: y,
+        url: url,
+        id: "char_" + tokens.length,
+        key: tokens.length,
+        dim: tokWidth,
+        isPanel: true,
       },
     ]);
+  }
+
+  function removeToken(index) {
+    console.log("INDEX: " + index);
+    let array = tokens;
+    array.splice(index, 1);
+    setTokens([...array]);
   }
 
   function fitImage() {
@@ -159,7 +196,7 @@ function Combat({ url, setUrl, urls, setUrls }) {
             display: "flex",
             flexDirection: "column",
             backgroundColor: "#940a0a",
-            zIndex: "100000",
+            zIndex: "1000",
           }}
         >
           <Tabs
@@ -184,11 +221,7 @@ function Combat({ url, setUrl, urls, setUrls }) {
           </Tabs>
           {value === 0 && <GridTool setGrid={setGrid} setTile={setTileSize} />}
           {value === 1 && (
-            <TokensPanel
-              urls={urls}
-              setUrls={setUrls}
-              tokenHandle={tokenHandle}
-            />
+            <TokensPanel urls={urls} setUrls={setUrls} newToken={newToken} />
           )}
           {value === 2 && <Tools />}
         </div>
@@ -215,12 +248,13 @@ function Combat({ url, setUrl, urls, setUrls }) {
           />
         )}
       </div>
-      {tokens.map((token, i) => (
+      {tokens.map((token) => (
         <Token
           dim={tileSize}
           token={token}
           tokens={tokens}
-          setTokens={setTokens}
+          newToken={newToken}
+          removeToken={removeToken}
         />
       ))}
     </>

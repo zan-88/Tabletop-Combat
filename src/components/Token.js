@@ -5,41 +5,19 @@ import useBorder from "../hooks/use-border";
 import useDraggable from "../hooks/use-draggable";
 import useGridBounds from "../hooks/use-gridBounds";
 
-export default function Token({ dim, token, tokens, setTokens }) {
+export default function Token({ dim, token, tokens, newToken, removeToken }) {
+  const [isPanel, setIsPanel] = useState(token.isPanel);
   const [tile, setTile] = useState(token.dim);
   const [initTile, setInitTile] = useState(token.dim);
   const { position: pos } = useGridBounds(
-    token.id,
+    token,
     { x: token.x, y: token.y },
     "grid",
     setTile,
-    token.dim,
     dim,
     newToken,
     removeToken
   );
-
-  function removeToken() {
-    if (tokens.length > 1) {
-      tokens.pop();
-      setTokens(tokens);
-    }
-  }
-
-  function newToken() {
-    console.log("loc: " + token.x);
-    setTokens([
-      ...tokens,
-      {
-        x: token.x,
-        y: token.y,
-        url: token.url,
-        id: "char_" + tokens.length,
-        key: tokens.length,
-        dim: initTile,
-      },
-    ]);
-  }
 
   useEffect(() => {
     let border = document.getElementById("grid");
@@ -63,7 +41,8 @@ export default function Token({ dim, token, tokens, setTokens }) {
       id={token.id}
       style={{
         position: "absolute",
-        background: `url(${token.url}) center`,
+        backgroundImage: `url(${token.url})`,
+        backgroundPosition: "center",
         backgroundSize: "cover",
         backgroundRepeat: "no-repeat",
         width: `${tile}px`,
