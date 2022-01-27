@@ -74,7 +74,11 @@ function Combat({ url, setUrl, urls, setUrls }) {
       val % 2 === 0
         ? panelLoc.offsetLeft + 0.05 * width
         : panelLoc.offsetLeft + width - (0.05 * width + tokWidth);
-    let y = panelLoc.offsetTop + 0.05 * height + tokWidth * ((val + 1) / 2);
+    let y =
+      panelLoc.getBoundingClientRect().top +
+      0.04 * height +
+      tokWidth * (val / 2) +
+      10 * val;
     console.log("LEN: " + tokens.length);
     setTokens((tokens) => [
       ...tokens,
