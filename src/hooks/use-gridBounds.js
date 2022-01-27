@@ -74,6 +74,10 @@ export default function useGridBounds(
         ) {
           setDim(token.dim);
           console.log("KEY: " + token.key);
+          setPosition({
+            x: -1000,
+            y: -1000,
+          });
         } else {
           setDim(tileDim);
           console.log(position);
