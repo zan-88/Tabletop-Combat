@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import useDraggable from "../hooks/use-draggable";
 import grid from "../images/grid.png";
+import Token from "./Token";
 
 export default function Map({
   imageUrl,
@@ -12,10 +13,36 @@ export default function Map({
   setLoc,
   isLoaded,
   gridVal,
-  tokens,
+  mapTokens,
+  setMapTokens,
+  tileSize,
 }) {
+  const [deleteKey, setDeleteKey] = useState(-1);
+  const notInitial = useRef(false);
+
+  //Delete Token effect
+  useEffect(() => {
+    if (notInitial.current) {
+      let newArr = mapTokens;
+      console.log("EVEN MORE FUCKK");
+      newArr = newArr.filter(function (tok) {
+        return tok.key !== deleteKey;
+      });
+      console.log(newArr);
+      setMapTokens([...newArr]);
+    } else {
+      notInitial.current = true;
+    }
+  }, [deleteKey]);
+
   useEffect(() => {
     let imag = document.getElementById("ugh");
+    // let border = document.getElementById("mapBack");
+    // if (border !== null) {
+    //   border.addEventListener("mouseout", function (e) {
+    //     window.addEventListener("mouseup", function (e) {});
+    //   });
+    // }
 
     fitImage();
     setLoc({
@@ -102,6 +129,17 @@ export default function Map({
           }}
         ></div>*/}
       </div>
+      {mapTokens.length > 0 &&
+        mapTokens.map((token) => (
+          <Token
+            tileSize={tileSize}
+            key={token.key}
+            token={token}
+            setDeleteKey={setDeleteKey}
+            setNewTokUrl={undefined}
+            setMapTok={undefined}
+          />
+        ))}{" "}
     </>
   );
 }

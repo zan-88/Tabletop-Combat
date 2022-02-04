@@ -1,32 +1,52 @@
+import { useState } from "react";
+
 export default function draggable(id) {
   let pos = { x: 0, y: 0 };
   let active = false;
   let offset = { x: 0, y: 0 };
+  let inMouse = { x: null, y: null };
   const drag = document.getElementById(id);
-  console.log("DRAHG");
-  drag.addEventListener("mousedown", start, false);
-  document.addEventListener("mousemove", function (e) {
-    if (active) {
-      move(e);
-    }
-  });
-  document.addEventListener("mouseup", function (e) {
+
+  if (drag) {
+    drag.addEventListener("mousedown", start, false);
+  }
+
+  function up(e) {
     stop(e.originalEvent);
-  });
+    document.removeEventListener("mousemove", function (e) {
+      if (active) {
+        move(e);
+      }
+    });
+    document.removeEventListener("mouseup", up);
+  }
+
   function start(e) {
-    let mouse = { x: e.clientX, y: e.clientY };
-    let l = drag.offsetLeft;
-    let t = drag.offsetTop;
-    offset = { x: mouse.x - l, y: mouse.y - t };
+    document.addEventListener("mousemove", function (e) {
+      if (active) {
+        move(e);
+      }
+    });
+    document.addEventListener("mouseup", up);
+    inMouse = {
+      x: e.clientX,
+      y: e.clientY,
+    };
+
+    offset = {
+      x: drag.offsetLeft,
+      y: drag.offsetTop,
+    };
+
     return (active = true);
   }
 
   function move(e) {
     e.preventDefault();
-    let mouse = { x: e.clientX, y: e.clientY };
-    let l = drag.offsetLeft;
-    let t = drag.offsetTop;
-    pos = { x: mouse.x - offset.x - l, y: mouse.y - offset.y - t };
+    pos = {
+      x: offset.x + e.clientX - inMouse.x,
+      y: offset.y + e.clientY - inMouse.y,
+    };
     drag.style.left = pos.x + "px";
     drag.style.top = pos.y + "px";
   }

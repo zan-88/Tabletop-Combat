@@ -32,7 +32,7 @@ function Combat({ url, setUrl, urls, setUrls }) {
   const [imgDim, setImgDim] = useState({ w: "", h: "" });
   const [isLoaded, setIsLoaded] = useState(false);
   const [loc, setLoc] = useState({ x: 0, y: 0 });
-  const [tile, setTile] = useState(0);
+  const [mapTokens, setMapTokens] = useState([]);
 
   const [tokens, setTokens] = useState([]);
   const [tileSize, setTileSize] = useState(44);
@@ -60,39 +60,6 @@ function Combat({ url, setUrl, urls, setUrls }) {
   //     },
   //   ]);
   // }
-
-  function newToken(url) {
-    let val = urls.findIndex(function (temp) {
-      return temp === url;
-    });
-    let panelLoc = document.getElementById("tokenBar");
-
-    let width = panelLoc.offsetWidth;
-    let tokWidth = width / 2 - 0.05 * width;
-    let height = panelLoc.offsetHeight;
-    let x =
-      val % 2 === 0
-        ? panelLoc.offsetLeft + 0.05 * width
-        : panelLoc.offsetLeft + width - (0.05 * width + tokWidth);
-    let y =
-      panelLoc.getBoundingClientRect().top +
-      0.04 * height +
-      tokWidth * (val / 2) +
-      10 * val;
-    console.log("LEN: " + tokens.length);
-    setTokens((tokens) => [
-      ...tokens,
-      {
-        x: x,
-        y: y,
-        url: url,
-        id: "char_" + tokens.length,
-        key: tokens.length,
-        dim: tokWidth,
-        isPanel: true,
-      },
-    ]);
-  }
 
   function removeToken(index) {
     console.log("INDEX: " + index);
@@ -223,11 +190,22 @@ function Combat({ url, setUrl, urls, setUrls }) {
               style={{ minWidth: "33%" }}
             />
           </Tabs>
-          {value === 0 && <GridTool setGrid={setGrid} setTile={setTileSize} />}
-          {value === 1 && (
-            <TokensPanel urls={urls} setUrls={setUrls} newToken={newToken} />
-          )}
-          {value === 2 && <Tools />}
+          <div style={{ display: value === 0 ? "inline" : "none" }}>
+            <GridTool setGrid={setGrid} setTile={setTileSize} />
+          </div>
+          <div
+            style={{ height: "100%", display: value === 1 ? "inline" : "none" }}
+          >
+            <TokensPanel
+              urls={urls}
+              setUrls={setUrls}
+              setMapTokens={setMapTokens}
+              tileSize={tileSize}
+            />
+          </div>
+          <div style={{ display: value === 2 ? "inline" : "none" }}>
+            <Tools />
+          </div>
         </div>
         {url === "" ? (
           <MapSection>
@@ -248,19 +226,12 @@ function Combat({ url, setUrl, urls, setUrls }) {
             setLoc={setLoc}
             isLoaded={isLoaded}
             gridVal={grid}
-            tokens={tokens}
+            mapTokens={mapTokens}
+            setMapTokens={setMapTokens}
+            tileSize={tileSize}
           />
         )}
       </div>
-      {tokens.map((token) => (
-        <Token
-          dim={tileSize}
-          token={token}
-          tokens={tokens}
-          newToken={newToken}
-          removeToken={removeToken}
-        />
-      ))}
     </>
   );
 }

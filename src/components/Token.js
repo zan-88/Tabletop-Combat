@@ -1,55 +1,41 @@
-import React, { useEffect, useState } from "react";
-import styled from "styled-components";
-import draggable from "../Functions/draggable";
-import useBorder from "../hooks/use-border";
-import useDraggable from "../hooks/use-draggable";
+import React, { useEffect } from "react";
 import useGridBounds from "../hooks/use-gridBounds";
 
-export default function Token({ dim, token, tokens, newToken, removeToken }) {
-  const [isPanel, setIsPanel] = useState(token.isPanel);
-  const [tile, setTile] = useState(token.dim);
-  const [initTile, setInitTile] = useState(token.dim);
+export default function Token({
+  tileSize,
+  token,
+  setDeleteKey,
+  setNewTokUrl,
+  setMapTok,
+}) {
   const { position: pos } = useGridBounds(
     token,
-    { x: token.x, y: token.y },
     "grid",
-    setTile,
-    dim,
-    newToken,
-    removeToken
+    tileSize,
+    setDeleteKey,
+    setNewTokUrl,
+    setMapTok
   );
 
   useEffect(() => {
-    let border = document.getElementById("grid");
-    if (border !== null) {
-      let x = border.getBoundingClientRect().left;
-      let y = border.getBoundingClientRect().top;
-      let width = border.offsetWidth;
-      let height = border.offsetHeight;
-      if (
-        !(pos.x > x && pos.x < x + width && pos.y > y && pos.y < y + height)
-      ) {
-        setTile(initTile);
-      } else {
-        setTile(dim);
-      }
-    }
-  }, [dim]);
+    token.x = pos.x;
+    token.y = pos.y;
+  }, [pos, token]);
 
   return (
     <div
       id={token.id}
       style={{
+        zIndex: "100",
         position: "absolute",
         backgroundImage: `url(${token.url})`,
         backgroundPosition: "center",
         backgroundSize: "cover",
         backgroundRepeat: "no-repeat",
-        width: `${tile}px`,
-        height: `${tile}px`,
+        width: `${token.dim}px`,
+        height: `${token.dim}px`,
         top: `${pos.y}px`,
         left: `${pos.x}px`,
-        zIndex: "900000",
       }}
     />
   );

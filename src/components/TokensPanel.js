@@ -1,27 +1,30 @@
 import { ImageList } from "@material-ui/core";
-import React, { useState, useEffect, useRef } from "react";
-//import useDraggable from "./hooks/use-draggable";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { storage, db } from "../firebase";
 import useDragFile from "../hooks/use-dragfile";
 import { useDropzone } from "react-dropzone";
 import styled from "styled-components";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import useDraggable from "../hooks/use-draggable";
-import draggable from "../Functions/draggable";
 import Token from "./Token";
 
-function TokensPanel({ urls, setUrls, newToken }) {
-  const [activeToken, setActiveToken] = useState("");
-  const [editState, setEditState] = useState(0);
+function TokensPanel({ urls, setUrls, setMapTokens, tileSize }) {
   const notInitial = useRef(false);
 
   document.body.style.overflow = "hidden";
 
-  let selec = document.getElementById("selection");
-  let selecW = selec.offsetWidth / 2.5;
+  let bar = document.getElementById("tokenBar");
 
   const [images, setImages] = useState([]);
-  const [tokens, setTokens] = useState([]);
+  const [panelTokens, setPanelTokens] = useState([]);
+  const [deleteKey, setDeleteKey] = useState(-1);
+  const [newTokUrl, setNewTokUrl] = useState("");
+  const [keyVal, setKeyVal] = useState(0);
+  const [mapTok, setMapTok] = useState({
+    url: "",
+    pos: { x: 0, y: 0 },
+    key: -1,
+  });
+  const scale = useRef(1);
 
   const { getRootProps, getInputProps } = useDropzone({
     accept: "image/*",
@@ -30,7 +33,6 @@ function TokensPanel({ urls, setUrls, newToken }) {
     onDrop: (acceptedFiles) => {
       setImages(acceptedFiles);
       if (acceptedFiles.length > 1) {
-        let bar = document.getElementById("tokenBar");
         bar.style.justifyContent = "center";
       }
     },
@@ -39,6 +41,7 @@ function TokensPanel({ urls, setUrls, newToken }) {
   useEffect(() => {
     if (notInitial.current) {
       newToken(urls[urls.length - 1]);
+      //window.addEventListener("wheel", onScroll);
     } else {
       notInitial.current = true;
     }
@@ -52,16 +55,76 @@ function TokensPanel({ urls, setUrls, newToken }) {
     }
   }, [images]);
 
-  useDragFile("tokenArea");
-  const img = new Image();
-
-  const handleChange = (e) => {
-    let events = [];
-    for (let i = 0; i < e.target.files.length; i++) {
-      const newImg = e.target.files[i];
-      setImages((prevState) => [...prevState, newImg]);
+  //Transfer token to map
+  useEffect(() => {
+    if (notInitial.current) {
+      setMapTokens((prev) => [
+        ...prev,
+        {
+          x: mapTok.pos.x,
+          y: mapTok.pos.y,
+          url: mapTok.url,
+          id: "char_" + mapTok.key,
+          key: mapTok.key,
+          dim: tileSize,
+          isPanel: true,
+        },
+      ]);
+      newToken(mapTok.url);
     }
-  };
+  }, [mapTok]);
+
+  //Delete Token effect
+  useEffect(() => {
+    if (notInitial.current) {
+      let newArr = panelTokens;
+      console.log("EVEN MORE FUCKK");
+      newArr = newArr.filter(function (tok) {
+        return tok.key !== deleteKey;
+      });
+      console.log(newArr);
+      setPanelTokens([...newArr]);
+    }
+  }, [deleteKey]);
+
+  //New Token effect
+  useEffect(() => {
+    if (newTokUrl !== "") {
+      newToken(newTokUrl);
+    }
+  }, [newTokUrl]);
+
+  function handleTokens(e) {
+    const border = document.getElementById("grid");
+    console.log(e);
+    let id = e.target.id;
+    let key = parseInt(id.replace("char_", ""));
+    let url = panelTokens[key].url;
+    if (border) {
+      let x = border.getBoundingClientRect().left;
+      let y = border.getBoundingClientRect().top;
+      let width = border.offsetWidth;
+      let height = border.offsetHeight;
+
+      if (
+        e.clientX > x &&
+        e.clientX < x + width &&
+        e.clientY > y &&
+        e.clientY < y + height
+      ) {
+        setMapTokens((toks) => [...toks, panelTokens[key]]);
+      }
+    }
+    let newArr = panelTokens;
+    console.log("FUCCCKKKK");
+    newArr.splice(key, 1);
+    console.log(newArr);
+    setPanelTokens([...newArr]);
+    console.log("KEY STUFF: " + key);
+    newToken(url);
+  }
+
+  useDragFile("tokenArea");
 
   const handleUpload = () => {
     images.map((image) => {
@@ -98,6 +161,52 @@ function TokensPanel({ urls, setUrls, newToken }) {
     });
   };
 
+  function newToken(url) {
+    let val = urls.findIndex(function (temp) {
+      return temp === url;
+    });
+    let panelLoc = document.getElementById("tokenBar");
+
+    if (panelLoc) {
+      let width = panelLoc.offsetWidth;
+      let tokWidth = width / 2 - 0.05 * width;
+      let height = panelLoc.offsetHeight;
+      let x =
+        val % 2 === 0
+          ? panelLoc.offsetLeft + 0.05 * width
+          : panelLoc.offsetLeft + width - (0.05 * width + tokWidth);
+      let y =
+        panelLoc.getBoundingClientRect().top +
+        0.04 * height +
+        tokWidth * (val / 2) +
+        10 * val;
+      let newArr = panelTokens;
+      setKeyVal(keyVal + 1);
+      newArr.push({
+        x: x,
+        y: y,
+        url: url,
+        id: "char_" + keyVal,
+        key: keyVal,
+        dim: tokWidth,
+        isPanel: true,
+      });
+
+      setPanelTokens([...newArr]);
+      console.log("______");
+      console.log(panelTokens.length);
+      console.log(panelTokens);
+    }
+  }
+
+  function onScroll(e) {
+    scale.current = scale + e.deltaY;
+    console.log(scale.current);
+
+    let bar = document.getElementById("tokenBar");
+    bar.scrollBy({ up: 30 });
+  }
+
   return (
     <TokenContainer>
       <TokenDrag>
@@ -107,7 +216,21 @@ function TokensPanel({ urls, setUrls, newToken }) {
           <CloudUploadIcon style={Cloud} />
         </TokenBorder>
       </TokenDrag>
-      <TokenBar id="tokenBar" />
+      <TokenBar id="tokenBar">
+        <div>
+          {panelTokens.length > 0 &&
+            panelTokens.map((token) => (
+              <Token
+                tileSize={tileSize}
+                key={token.key}
+                token={token}
+                setDeleteKey={setDeleteKey}
+                setNewTokUrl={setNewTokUrl}
+                setMapTok={setMapTok}
+              />
+            ))}{" "}
+        </div>
+      </TokenBar>
     </TokenContainer>
   );
 }
@@ -122,7 +245,6 @@ const TokenContainer = styled.div`
 
 const TokenBar = styled.div`
   overflow-x: hidden;
-  overflow-y: auto;
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
@@ -154,8 +276,9 @@ const TokenBorder = styled.div`
 `;
 
 const TokenText = styled.div`
-  font-size: 2vh;
+  font-size: 1.1em;
   text-align: center;
+  padding: 1%;
 `;
 
 const Cloud = {
