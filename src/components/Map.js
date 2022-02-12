@@ -132,12 +132,12 @@ export default function Map({
       {mapTokens.length > 0 &&
         mapTokens.map((token) => (
           <Token
-            tileSize={tileSize}
             key={token.key}
+            tileSize={tileSize}
             token={token}
             setDeleteKey={setDeleteKey}
             setNewTokUrl={undefined}
-            setMapTok={undefined}
+            setMapTok={null}
           />
         ))}{" "}
     </>

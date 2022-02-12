@@ -8,14 +8,16 @@ import Slider from "@mui/material/Slider";
 import ArrowCircleLeftIcon from "@mui/icons-material/ArrowCircleLeft";
 import ArrowCircleRightIcon from "@mui/icons-material/ArrowCircleRight";
 
-export default function GridTool({ setGrid, setTile }) {
+export default function GridTool({ setGrid, setTile, gridVal }) {
   let value = "";
   const [prevDim, setPrevDim] = useState(true);
   function handleAdjustClick() {
     let img = document.getElementById("ugh");
   }
+
   function handleAdjustSlide(e) {
     let val = parseInt(e.target.value);
+    gridVal.current = val;
     let img = document.getElementById("ugh");
     let container = document.getElementById("mapBack");
     if (img !== null) {

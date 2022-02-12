@@ -7,7 +7,9 @@ import Build from "@material-ui/icons/Build";
 import AccountCircleIcon from "@material-ui/icons/AccountCircle";
 import Map from "./components/Map";
 import Combat from "./components/Combat";
+import Hub from "./components/Hub";
 import useDraggable from "./hooks/use-draggable";
+import styled from "styled-components";
 
 function App() {
   const [value, setValue] = useState(0);
@@ -23,7 +25,6 @@ function App() {
         width: "100%",
         height: "100vh",
         boxSizing: "border-box",
-        backgroundColor: "#940a0a",
         display: "flex",
         flexDirection: "column",
         position: "relative",
@@ -31,6 +32,7 @@ function App() {
       }}
     >
       {url === "" && <div id="grid"></div>}
+
       <Tabs
         style={{ backgroundColor: "black", height: "50px", zIndex: "1000" }}
         variant="scrollable"
@@ -51,8 +53,8 @@ function App() {
       {value === 0 && (
         <Combat url={url} setUrl={setUrl} urls={urls} setUrls={setUrls} />
       )}
+      {/* <Hub /> */}
     </div>
   );
 }
-
 export default App;

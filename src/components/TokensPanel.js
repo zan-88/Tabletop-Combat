@@ -6,6 +6,7 @@ import { useDropzone } from "react-dropzone";
 import styled from "styled-components";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import Token from "./Token";
+import * as GridHelper from "../Functions/GridMapConv";
 
 function TokensPanel({ urls, setUrls, setMapTokens, tileSize }) {
   const notInitial = useRef(false);
@@ -58,11 +59,12 @@ function TokensPanel({ urls, setUrls, setMapTokens, tileSize }) {
   //Transfer token to map
   useEffect(() => {
     if (notInitial.current) {
+      let coordPos = GridHelper.MapToCoord(mapTok.pos, "grid", tileSize);
       setMapTokens((prev) => [
         ...prev,
         {
-          x: mapTok.pos.x,
-          y: mapTok.pos.y,
+          x: coordPos.x,
+          y: coordPos.y,
           url: mapTok.url,
           id: "char_" + mapTok.key,
           key: mapTok.key,
@@ -199,13 +201,21 @@ function TokensPanel({ urls, setUrls, setMapTokens, tileSize }) {
     }
   }
 
-  function onScroll(e) {
-    scale.current = scale + e.deltaY;
-    console.log(scale.current);
+  // function handleMouseDown(tok) {
+  //   let tmep = document.getElementById("tokenPlaced");
 
-    let bar = document.getElementById("tokenBar");
-    bar.scrollBy({ up: 30 });
-  }
+  //   if (panelTokens.length > 0) {
+  //     tmep.innerHTML = `<Token
+  //     key={tok.key}
+  //     tileSize={tileSize}
+  //     token={tok}
+  //     setDeleteKey={setDeleteKey}
+  //     setNewTokUrl={setNewTokUrl}
+  //     setMapTok={setMapTok}
+  //     isPanel={true}
+  //   />`;
+  //   }
+  // }
 
   return (
     <TokenContainer>
@@ -217,16 +227,39 @@ function TokensPanel({ urls, setUrls, setMapTokens, tileSize }) {
         </TokenBorder>
       </TokenDrag>
       <TokenBar id="tokenBar">
+        {/* {urls.map((url, i) => (
+          <TokenHolder key={i} src={url} alt="" />
+        ))} */}
+        {/* {panelTokens.length > 0 &&
+          panelTokens.map((token) => (
+            <div
+              onMouseDown={handleMouseDown(token)}
+              key={token.key}
+              style={{
+                position: "relative",
+                backgroundImage: `url(${token.url})`,
+                left: `${token.x}px`,
+                WebkitBackgroundSize: "contain",
+                backgroundSize: "contain",
+                backgroundRepeat: "no-repeat",
+                width: `${token.dim}px`,
+                height: `${token.dim}px`,
+                minWidth: "100%",
+              }}
+            />
+          ))}{" "}
+        <div id="tokenPlaced"></div> */}
         <div>
           {panelTokens.length > 0 &&
             panelTokens.map((token) => (
               <Token
-                tileSize={tileSize}
                 key={token.key}
+                tileSize={tileSize}
                 token={token}
                 setDeleteKey={setDeleteKey}
                 setNewTokUrl={setNewTokUrl}
                 setMapTok={setMapTok}
+                isPanel={true}
               />
             ))}{" "}
         </div>
@@ -240,11 +273,14 @@ export default TokensPanel;
 const TokenContainer = styled.div`
   display: flex;
   flex-direction: column;
+  width: 100%;
+  min-width: 100%;
   height: 100%;
 `;
 
 const TokenBar = styled.div`
   overflow-x: hidden;
+  overflow-y: auto;
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
@@ -252,6 +288,10 @@ const TokenBar = styled.div`
   align-content: flex-start;
   width: 100%;
   height: 80%;
+`;
+
+const TokenHolder = styled.img`
+  flex-grow: 1;
 `;
 
 const TokenDrag = styled.div`

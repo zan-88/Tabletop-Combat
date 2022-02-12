@@ -1,5 +1,6 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import useGridBounds from "../hooks/use-gridBounds";
+import * as GridHelper from "../Functions/GridMapConv";
 
 export default function Token({
   tileSize,
@@ -7,20 +8,33 @@ export default function Token({
   setDeleteKey,
   setNewTokUrl,
   setMapTok,
+  isPanel = false,
 }) {
+  const [coord, setCoord] = useState({ x: token.x, y: token.y });
+  const [triggerResize, setTriggerResize] = useState(-1);
+  const resized = useRef(coord);
+  const [adjustedPos, setAdjustedPos] = useState({ x: token.x, y: token.y });
   const { position: pos } = useGridBounds(
     token,
     "grid",
     tileSize,
     setDeleteKey,
     setNewTokUrl,
-    setMapTok
+    setMapTok,
+    setCoord
   );
 
   useEffect(() => {
-    token.x = pos.x;
-    token.y = pos.y;
-  }, [pos, token]);
+    if (!isPanel) {
+      let temp = GridHelper.coordToMap(resized.current, "grid", tileSize);
+      pos.x = temp.x;
+      pos.y = temp.y;
+    }
+  }, [tileSize]);
+
+  useEffect(() => {
+    resized.current = GridHelper.MapToCoord(pos, "grid", tileSize);
+  }, [pos]);
 
   return (
     <div
@@ -32,8 +46,8 @@ export default function Token({
         backgroundPosition: "center",
         backgroundSize: "cover",
         backgroundRepeat: "no-repeat",
-        width: `${token.dim}px`,
-        height: `${token.dim}px`,
+        width: setMapTok ? token.dim : `${tileSize}px`,
+        height: setMapTok ? token.dim : `${tileSize}px`,
         top: `${pos.y}px`,
         left: `${pos.x}px`,
       }}

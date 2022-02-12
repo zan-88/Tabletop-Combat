@@ -36,6 +36,7 @@ function Combat({ url, setUrl, urls, setUrls }) {
 
   const [tokens, setTokens] = useState([]);
   const [tileSize, setTileSize] = useState(44);
+  const gridVal = useRef(20);
 
   useDragFile("dragArea");
 
@@ -69,6 +70,7 @@ function Combat({ url, setUrl, urls, setUrls }) {
   }
 
   function fitImage() {
+    //IMAGE FITTING FUNCTIONALITY
     let container = document.getElementById("mapBack");
     let img = document.getElementById("ugh");
     if (
@@ -82,6 +84,28 @@ function Combat({ url, setUrl, urls, setUrls }) {
       let wVal = (img.width * container.offsetHeight) / img.height;
       setImgDim({ w: `${wVal}px`, h: `${container.offsetHeight}px` });
       setInitDim({ w: wVal, h: container.offsetHeight });
+    }
+
+    //GRID FITTING FUNCTIONALITY
+    if (img !== null) {
+      let imgW = img.offsetWidth;
+      let imgH = img.offsetHeight;
+      let contW = container.offsetWidth;
+      let contH = container.offsetHeight;
+
+      if (imgH === contH) {
+        let offset = imgH;
+        let sps = offset / gridVal.current;
+        let width = 50 * sps; //50 might seem magic but it is the width of the grid img divided by the size in pixels of one square
+        setGrid({ w: width, h: 0 });
+        setTileSize(sps);
+      } else {
+        let offset = imgW;
+        let sps = offset / gridVal.current;
+        let dim = 50 * sps; //50 might seem magic but it is the width of the grid img divided by the size in pixels of one square
+        setGrid({ w: dim, h: 0 });
+        setTileSize(sps);
+      }
     }
   }
 
@@ -191,7 +215,11 @@ function Combat({ url, setUrl, urls, setUrls }) {
             />
           </Tabs>
           <div style={{ display: value === 0 ? "inline" : "none" }}>
-            <GridTool setGrid={setGrid} setTile={setTileSize} />
+            <GridTool
+              setGrid={setGrid}
+              setTile={setTileSize}
+              gridVal={gridVal}
+            />
           </div>
           <div
             style={{ height: "100%", display: value === 1 ? "inline" : "none" }}
@@ -218,8 +246,6 @@ function Combat({ url, setUrl, urls, setUrls }) {
         ) : (
           <Map
             imageUrl={url}
-            gridId={grid}
-            val={val}
             loc={loc}
             dim={imgDim}
             fitImage={fitImage}

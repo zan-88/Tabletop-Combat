@@ -1,5 +1,6 @@
 import { logDOM } from "@testing-library/react";
 import { useState, useEffect } from "react";
+import * as GridHelper from "../Functions/GridMapConv";
 
 export default function useGridBounds(
   token,
@@ -7,12 +8,14 @@ export default function useGridBounds(
   tileDim,
   setDeleteKey,
   setNewTokUrl = null,
-  setMapTok = null
+  setMapTok = null,
+  setCoord
 ) {
-  const [position, setPosition] = useState({
-    x: token.x,
-    y: token.y,
-  });
+  const [position, setPosition] = useState(
+    setNewTokUrl
+      ? { x: token.x, y: token.y }
+      : GridHelper.coordToMap({ x: token.x, y: token.y }, "grid", tileDim)
+  );
 
   let inMouse = { x: null, y: null };
   let offset = { x: null, y: null };
@@ -53,17 +56,19 @@ export default function useGridBounds(
           e.clientY < y + height
         )
       ) {
+        //DELETES TOKEN
         setDeleteKey(token.key);
         if (setNewTokUrl) {
           setNewTokUrl("");
           setNewTokUrl(token.url);
         }
       } else {
-        console.log(position);
+        //SETS TOKEN
         let loc = {
           x: Math.floor((e.clientX - x) / tileDim) * tileDim + x,
           y: Math.floor((e.clientY - y) / tileDim) * tileDim + y,
         };
+        setCoord(GridHelper.MapToCoord(loc, "grid", tileDim));
         setPosition(loc);
         let temp = { url: "", pos: { x: 0, y: 0 }, key: -1 };
         if (setMapTok) {
@@ -90,7 +95,6 @@ export default function useGridBounds(
       setPosition(pos);
     }
     drag.addEventListener("mousedown", down);
-    console.log("REEE");
 
     return () => {
       drag.removeEventListener("mousedown", down);
