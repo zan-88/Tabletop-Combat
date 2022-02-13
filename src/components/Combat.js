@@ -61,14 +61,6 @@ function Combat({ url, setUrl, urls, setUrls }) {
   //     },
   //   ]);
   // }
-
-  function removeToken(index) {
-    console.log("INDEX: " + index);
-    let array = tokens;
-    array.splice(index, 1);
-    setTokens([...array]);
-  }
-
   function fitImage() {
     //IMAGE FITTING FUNCTIONALITY
     let container = document.getElementById("mapBack");
@@ -195,23 +187,23 @@ function Combat({ url, setUrl, urls, setUrls }) {
           }}
         >
           <Tabs
-            style={{ backgroundColor: "black" }}
+            style={{ backgroundColor: "black", zIndex: "1000" }}
             variant="scrollable"
             value={value}
             onChange={handleChangeTab}
             aria-label="simple tabs example"
           >
             <Tab
-              style={{ minWidth: "33%" }}
+              style={{ minWidth: "33%", zIndex: "1000" }}
               icon={<Grid4x4Icon style={{ color: "white" }} />}
             />
             <Tab
               icon={<AccountCircleIcon style={{ color: "white" }} />}
-              style={{ minWidth: "33%" }}
+              style={{ minWidth: "33%", zIndex: "1000" }}
             />
             <Tab
               icon={<Build style={{ color: "white" }} />}
-              style={{ minWidth: "33%" }}
+              style={{ minWidth: "33%", zIndex: "1000" }}
             />
           </Tabs>
           <div style={{ display: value === 0 ? "inline" : "none" }}>

@@ -12,7 +12,7 @@ import useDraggable from "./hooks/use-draggable";
 import styled from "styled-components";
 
 function App() {
-  const [value, setValue] = useState(0);
+  const [value, setValue] = useState(-1);
   const [url, setUrl] = useState("");
   const [urls, setUrls] = useState([]);
 
@@ -28,32 +28,16 @@ function App() {
         display: "flex",
         flexDirection: "column",
         position: "relative",
-        zIndex: "10000000",
       }}
     >
       {url === "" && <div id="grid"></div>}
+      {value === -1 && <Hub setValue={setValue} />}
 
-      <Tabs
-        style={{ backgroundColor: "black", height: "50px", zIndex: "1000" }}
-        variant="scrollable"
-        value={value}
-        onChange={handleChange}
-        aria-label="simple tabs example"
-      >
-        <Tab
-          style={{ minWidth: "50%" }}
-          icon={<AccountCircleIcon style={{ color: "white" }} />}
-        />
-        <Tab
-          icon={<Build style={{ color: "white" }} />}
-          style={{ minWidth: "50%" }}
-        />
-        <Tab label="Item Three" />
-      </Tabs>
-      {value === 0 && (
+      {value === 1 && (
         <Combat url={url} setUrl={setUrl} urls={urls} setUrls={setUrls} />
       )}
-      {/* <Hub /> */}
+
+      {/*  */}
     </div>
   );
 }

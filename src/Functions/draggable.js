@@ -8,7 +8,7 @@ export default function draggable(id) {
   const drag = document.getElementById(id);
 
   if (drag) {
-    drag.addEventListener("mousedown", start, false);
+    drag.addEventListener("mouseover", start, false);
   }
 
   function up(e) {

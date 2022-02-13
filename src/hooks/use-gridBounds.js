@@ -1,4 +1,3 @@
-import { logDOM } from "@testing-library/react";
 import { useState, useEffect } from "react";
 import * as GridHelper from "../Functions/GridMapConv";
 
@@ -9,7 +8,8 @@ export default function useGridBounds(
   setDeleteKey,
   setNewTokUrl = null,
   setMapTok = null,
-  setCoord
+  setCoord,
+  scrollDis = 0
 ) {
   const [position, setPosition] = useState(
     setNewTokUrl
@@ -33,7 +33,6 @@ export default function useGridBounds(
         x: drag.offsetLeft,
         y: drag.offsetTop,
       };
-
       e.preventDefault();
       document.body.addEventListener("mousemove", move);
       document.body.addEventListener("mouseup", up);
@@ -89,7 +88,10 @@ export default function useGridBounds(
       e.preventDefault();
       const pos = {
         x: offset.x + e.clientX - inMouse.x,
-        y: offset.y + e.clientY - inMouse.y,
+        y:
+          scrollDis !== 0
+            ? offset.y + e.clientY - inMouse.y + scrollDis.current
+            : offset.y + e.clientY - inMouse.y,
       };
 
       setPosition(pos);

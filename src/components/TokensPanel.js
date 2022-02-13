@@ -2,6 +2,7 @@ import { ImageList } from "@material-ui/core";
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { storage, db } from "../firebase";
 import useDragFile from "../hooks/use-dragfile";
+import draggable from "../Functions/draggable";
 import { useDropzone } from "react-dropzone";
 import styled from "styled-components";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
@@ -15,8 +16,36 @@ function TokensPanel({ urls, setUrls, setMapTokens, tileSize }) {
 
   let bar = document.getElementById("tokenBar");
 
+  //token scroll modifier
+  const [triggerResize, setTriggerResize] = useState(-1);
+  const scrollDis = useRef(0);
+  const scrollRect = useRef({ y: 0, height: 0 });
+
+  useEffect(() => {
+    let panel = document.getElementById("tokenBar");
+
+    panel.addEventListener("wheel", function (e) {
+      let panelLoc = document.getElementById("tokenBar");
+      let height = panelLoc.offsetHeight;
+
+      if (
+        (scrollRect.current.height - scrollDis.current >= window.innerHeight &&
+          e.deltaY > 0) ||
+        (scrollRect.current.y >=
+          panelLoc.getBoundingClientRect().top + 0.04 * height &&
+          e.deltaY < 0)
+      ) {
+        setTriggerResize(scrollDis.current + e.deltaY * 0.1);
+        scrollDis.current += e.deltaY * 0.1;
+        scrollRect.current.y += e.deltaY * 0.1;
+      }
+    });
+  }, []);
+
   const [images, setImages] = useState([]);
   const [panelTokens, setPanelTokens] = useState([]);
+  const activeToken = useRef({});
+  let isTokenActive = false;
   const [deleteKey, setDeleteKey] = useState(-1);
   const [newTokUrl, setNewTokUrl] = useState("");
   const [keyVal, setKeyVal] = useState(0);
@@ -80,11 +109,9 @@ function TokensPanel({ urls, setUrls, setMapTokens, tileSize }) {
   useEffect(() => {
     if (notInitial.current) {
       let newArr = panelTokens;
-      console.log("EVEN MORE FUCKK");
       newArr = newArr.filter(function (tok) {
         return tok.key !== deleteKey;
       });
-      console.log(newArr);
       setPanelTokens([...newArr]);
     }
   }, [deleteKey]);
@@ -98,7 +125,6 @@ function TokensPanel({ urls, setUrls, setMapTokens, tileSize }) {
 
   function handleTokens(e) {
     const border = document.getElementById("grid");
-    console.log(e);
     let id = e.target.id;
     let key = parseInt(id.replace("char_", ""));
     let url = panelTokens[key].url;
@@ -118,11 +144,8 @@ function TokensPanel({ urls, setUrls, setMapTokens, tileSize }) {
       }
     }
     let newArr = panelTokens;
-    console.log("FUCCCKKKK");
     newArr.splice(key, 1);
-    console.log(newArr);
     setPanelTokens([...newArr]);
-    console.log("KEY STUFF: " + key);
     newToken(url);
   }
 
@@ -195,31 +218,16 @@ function TokensPanel({ urls, setUrls, setMapTokens, tileSize }) {
       });
 
       setPanelTokens([...newArr]);
-      console.log("______");
-      console.log(panelTokens.length);
-      console.log(panelTokens);
+      if (y + tokWidth + triggerResize > scrollRect.current.height)
+        scrollRect.current.height = y + tokWidth + scrollDis.current;
+
+      if (urls.length === 1) scrollRect.current.y = y;
     }
   }
 
-  // function handleMouseDown(tok) {
-  //   let tmep = document.getElementById("tokenPlaced");
-
-  //   if (panelTokens.length > 0) {
-  //     tmep.innerHTML = `<Token
-  //     key={tok.key}
-  //     tileSize={tileSize}
-  //     token={tok}
-  //     setDeleteKey={setDeleteKey}
-  //     setNewTokUrl={setNewTokUrl}
-  //     setMapTok={setMapTok}
-  //     isPanel={true}
-  //   />`;
-  //   }
-  // }
-
   return (
     <TokenContainer>
-      <TokenDrag>
+      <TokenDrag id="tokenDrag">
         <TokenBorder id="tokenArea" {...getRootProps()}>
           <TokenText>Choose Tokens or Drag Here</TokenText>
           <input style={{ width: "100%" }} {...getInputProps()} />
@@ -227,28 +235,6 @@ function TokensPanel({ urls, setUrls, setMapTokens, tileSize }) {
         </TokenBorder>
       </TokenDrag>
       <TokenBar id="tokenBar">
-        {/* {urls.map((url, i) => (
-          <TokenHolder key={i} src={url} alt="" />
-        ))} */}
-        {/* {panelTokens.length > 0 &&
-          panelTokens.map((token) => (
-            <div
-              onMouseDown={handleMouseDown(token)}
-              key={token.key}
-              style={{
-                position: "relative",
-                backgroundImage: `url(${token.url})`,
-                left: `${token.x}px`,
-                WebkitBackgroundSize: "contain",
-                backgroundSize: "contain",
-                backgroundRepeat: "no-repeat",
-                width: `${token.dim}px`,
-                height: `${token.dim}px`,
-                minWidth: "100%",
-              }}
-            />
-          ))}{" "}
-        <div id="tokenPlaced"></div> */}
         <div>
           {panelTokens.length > 0 &&
             panelTokens.map((token) => (
@@ -260,6 +246,8 @@ function TokensPanel({ urls, setUrls, setMapTokens, tileSize }) {
                 setNewTokUrl={setNewTokUrl}
                 setMapTok={setMapTok}
                 isPanel={true}
+                triggerResize={triggerResize}
+                scrollDis={scrollDis}
               />
             ))}{" "}
         </div>
@@ -299,8 +287,10 @@ const TokenDrag = styled.div`
   flex-direction: column;
   justify-content: space-around;
   align-items: center;
-  margin: 4%;
+  padding: 4%;
   height: 20%;
+  background-color: #940a0a;
+  z-index: 100;
 `;
 const TokenBorder = styled.div`
   border: 5px dashed white;

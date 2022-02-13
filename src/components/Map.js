@@ -24,11 +24,9 @@ export default function Map({
   useEffect(() => {
     if (notInitial.current) {
       let newArr = mapTokens;
-      console.log("EVEN MORE FUCKK");
       newArr = newArr.filter(function (tok) {
         return tok.key !== deleteKey;
       });
-      console.log(newArr);
       setMapTokens([...newArr]);
     } else {
       notInitial.current = true;

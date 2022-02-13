@@ -9,11 +9,15 @@ export default function Token({
   setNewTokUrl,
   setMapTok,
   isPanel = false,
+  triggerResize = 0,
+  scrollDis = 0,
 }) {
   const [coord, setCoord] = useState({ x: token.x, y: token.y });
-  const [triggerResize, setTriggerResize] = useState(-1);
+
   const resized = useRef(coord);
+
   const [adjustedPos, setAdjustedPos] = useState({ x: token.x, y: token.y });
+
   const { position: pos } = useGridBounds(
     token,
     "grid",
@@ -21,7 +25,8 @@ export default function Token({
     setDeleteKey,
     setNewTokUrl,
     setMapTok,
-    setCoord
+    setCoord,
+    scrollDis
   );
 
   useEffect(() => {
@@ -40,7 +45,7 @@ export default function Token({
     <div
       id={token.id}
       style={{
-        zIndex: "100",
+        zIndex: isPanel ? 0 : 10000,
         position: "absolute",
         backgroundImage: `url(${token.url})`,
         backgroundPosition: "center",
@@ -48,7 +53,7 @@ export default function Token({
         backgroundRepeat: "no-repeat",
         width: setMapTok ? token.dim : `${tileSize}px`,
         height: setMapTok ? token.dim : `${tileSize}px`,
-        top: `${pos.y}px`,
+        top: `${pos.y - triggerResize}px`,
         left: `${pos.x}px`,
       }}
     />
