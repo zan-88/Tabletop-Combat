@@ -7,13 +7,30 @@ import Box from "@mui/material/Box";
 import Slider from "@mui/material/Slider";
 import ArrowCircleLeftIcon from "@mui/icons-material/ArrowCircleLeft";
 import ArrowCircleRightIcon from "@mui/icons-material/ArrowCircleRight";
+import styled from "styled-components";
 
-export default function GridTool({ setGrid, setTile, gridVal }) {
+export default function GridTool({
+  setGrid,
+  setTile,
+  gridVal,
+  partyCode,
+  setPartyCode,
+  isMap,
+}) {
   let value = "";
   const [prevDim, setPrevDim] = useState(true);
+
+  const [btnText, setBtnText] = useState("Set Map Before starting your party!");
+
   function handleAdjustClick() {
     let img = document.getElementById("ugh");
   }
+
+  useEffect(() => {
+    if (isMap) {
+      setBtnText("Start Party!");
+    }
+  }, [isMap]);
 
   function handleAdjustSlide(e) {
     let val = parseInt(e.target.value);
@@ -65,6 +82,16 @@ export default function GridTool({ setGrid, setTile, gridVal }) {
     }
   }
 
+  const handleParty = () => {
+    let codeLen = 6;
+    let temp = "";
+    while (codeLen > 0) {
+      temp += String.fromCharCode(Math.floor(Math.random() * 26) + 65);
+      codeLen--;
+    }
+    setPartyCode(temp);
+  };
+
   return (
     <div
       style={{
@@ -113,10 +140,24 @@ export default function GridTool({ setGrid, setTile, gridVal }) {
           valueLabelDisplay="auto"
           onChange={handleAdjustSlide}
         />
-        <Button onClick={handleAdjustClick} variant="outline-dark">
-          WIP
-        </Button>
+        {partyCode === "" && (
+          <Button
+            onClick={handleParty}
+            variant="outline-dark"
+            disabled={!isMap}
+          >
+            {btnText}
+          </Button>
+        )}
+        {partyCode !== "" && <PartyCode>Party Code: {partyCode}</PartyCode>}
       </div>
     </div>
   );
 }
+
+const PartyCode = styled.div`
+  color: black;
+  font-size: 2vh;
+  font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+  text-align: center;
+`;

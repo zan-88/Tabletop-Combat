@@ -18,10 +18,11 @@ export function MapToCoord(pos, grid, tileDim) {
   if (bounds === null) return "yeet";
   let bx = bounds.getBoundingClientRect().left;
   let by = bounds.getBoundingClientRect().top;
-
+  let tempX = pos.x - bx;
+  let tempY = pos.y - by;
   let newPos = {
-    x: Math.floor((pos.x - bx) / tileDim),
-    y: Math.floor((pos.y - by) / tileDim),
+    x: Math.floor(tempX / tileDim),
+    y: Math.floor(tempY / tileDim),
   };
 
   return newPos;

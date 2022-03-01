@@ -9,6 +9,17 @@ import "mdbreact/dist/css/mdb.css";
 import { MDBIcon } from "mdbreact";
 
 export default function Hub({ setValue }) {
+  const makeCode = () => {
+    let codeLength = 6;
+    let code = "";
+    while (codeLength > 0) {
+      code += String.fromCharCode(Math.floor(Math.random() * 26) + 65);
+      codeLength--;
+    }
+
+    return code;
+  };
+
   return (
     <div
       style={{
@@ -23,7 +34,7 @@ export default function Hub({ setValue }) {
         <RoleText>Dungeon Master</RoleText>
         <MDBIcon icon="dragon" style={RoleIcon} />
       </RoleButton>
-      <RoleButton id="playerBtn">
+      <RoleButton id="playerBtn" onClick={() => setValue(2)}>
         <RoleText>player</RoleText>
         <MDBIcon icon="dice-d20" style={RoleIcon} />
       </RoleButton>

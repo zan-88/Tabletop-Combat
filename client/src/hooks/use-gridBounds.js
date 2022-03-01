@@ -9,7 +9,9 @@ export default function useGridBounds(
   setNewTokUrl = null,
   setMapTok = null,
   setCoord,
-  scrollDis = 0
+  scrollDis = 0,
+  isOwner,
+  socket
 ) {
   const [position, setPosition] = useState(
     setNewTokUrl
@@ -67,7 +69,8 @@ export default function useGridBounds(
           x: Math.floor((e.clientX - x) / tileDim) * tileDim + x,
           y: Math.floor((e.clientY - y) / tileDim) * tileDim + y,
         };
-        setCoord(GridHelper.MapToCoord(loc, "grid", tileDim));
+        let coord = GridHelper.MapToCoord(loc, "grid", tileDim);
+        setCoord(coord);
         setPosition(loc);
         let temp = { url: "", pos: { x: 0, y: 0 }, key: -1 };
         if (setMapTok) {
@@ -77,8 +80,17 @@ export default function useGridBounds(
             key: token.key,
           };
           setDeleteKey(token.key);
+          console.log("del");
           return setMapTok(temp);
         }
+        console.log("moving token");
+        socket.volatile.emit("token-change-pos", {
+          key: token.key,
+          x: coord.x,
+          y: coord.y,
+          url: token.url,
+          id: token.id,
+        });
       }
       document.body.removeEventListener("mousemove", move);
       document.body.removeEventListener("mouseup", up);
@@ -96,7 +108,8 @@ export default function useGridBounds(
 
       setPosition(pos);
     }
-    drag.addEventListener("mousedown", down);
+
+    if (isOwner) drag.addEventListener("mousedown", down);
 
     return () => {
       drag.removeEventListener("mousedown", down);
