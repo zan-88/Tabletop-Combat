@@ -1,32 +1,39 @@
 import React, { useEffect, useState, useRef } from "react";
 import useGridBounds from "../hooks/use-gridBounds";
 import * as GridHelper from "../Functions/GridMapConv";
+import * as GameRequest from "../Functions/gameRequest";
 
 export default function Token({
   tileSize,
   token,
   setDeleteKey,
+  setChangeKey = null,
   setNewTokUrl,
   setMapTok,
   isPanel = false,
   triggerResize = 0,
   scrollDis = 0,
+  isOwner,
+  socket,
 }) {
   const [coord, setCoord] = useState({ x: token.x, y: token.y });
 
   const resized = useRef(coord);
 
-  const [adjustedPos, setAdjustedPos] = useState({ x: token.x, y: token.y });
+  const [notInitial, setNotInitial] = useState(false);
 
   const { position: pos } = useGridBounds(
     token,
     "grid",
     tileSize,
     setDeleteKey,
+    setChangeKey,
     setNewTokUrl,
     setMapTok,
     setCoord,
-    scrollDis
+    scrollDis,
+    isOwner,
+    socket
   );
 
   useEffect(() => {
@@ -40,6 +47,18 @@ export default function Token({
   useEffect(() => {
     resized.current = GridHelper.MapToCoord(pos, "grid", tileSize);
   }, [pos]);
+
+  useEffect(() => {
+    if (!isPanel && notInitial) {
+      GameRequest.updateToken({
+        key: token.key,
+        x: coord.x,
+        y: coord.y,
+        tileSize: tileSize,
+      });
+    }
+    setNotInitial(true);
+  }, [coord]);
 
   return (
     <div

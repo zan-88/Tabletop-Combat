@@ -8,8 +8,16 @@ import styled from "styled-components";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import Token from "./Token";
 import * as GridHelper from "../Functions/GridMapConv";
+import * as GameRequest from "../Functions/gameRequest";
 
-function TokensPanel({ urls, setUrls, setMapTokens, tileSize }) {
+function TokensPanel({
+  urls,
+  setUrls,
+  setMapTokens,
+  tileSize,
+  partyCode,
+  socket,
+}) {
   const notInitial = useRef(false);
 
   document.body.style.overflow = "hidden";
@@ -85,23 +93,32 @@ function TokensPanel({ urls, setUrls, setMapTokens, tileSize }) {
     }
   }, [images]);
 
+  function TransferToken(mapTok) {
+    let coordPos = GridHelper.MapToCoord(mapTok.pos, "grid", tileSize);
+    let token = {
+      x: coordPos.x,
+      y: coordPos.y,
+      url: mapTok.url,
+      id: `${partyCode}(DM)${mapTok.key}`,
+      key: `${partyCode}(DM)${mapTok.key}`,
+      dim: tileSize,
+      partyCode: partyCode,
+    };
+    setMapTokens((prev) => [...prev, token]);
+    if (token.key !== `${partyCode}(DM)-1`) GameRequest.setToken(token);
+    newToken(mapTok.url);
+  }
+
   //Transfer token to map
   useEffect(() => {
-    if (notInitial.current) {
-      let coordPos = GridHelper.MapToCoord(mapTok.pos, "grid", tileSize);
-      setMapTokens((prev) => [
-        ...prev,
-        {
-          x: coordPos.x,
-          y: coordPos.y,
-          url: mapTok.url,
-          id: "char_" + mapTok.key,
-          key: mapTok.key,
-          dim: tileSize,
-          isPanel: true,
-        },
-      ]);
-      newToken(mapTok.url);
+    if (notInitial.current && mapTok.key !== -1) {
+      TransferToken(mapTok);
+      let coord = GridHelper.MapToCoord(mapTok.pos, "grid", tileSize);
+      socket.emit("add-token-map", {
+        key: `${partyCode}(DM)${mapTok.key}`,
+        position: coord,
+        url: mapTok.url,
+      });
     }
   }, [mapTok]);
 
@@ -167,19 +184,6 @@ function TokensPanel({ urls, setUrls, setMapTokens, tileSize }) {
             .getDownloadURL()
             .then((url) => {
               setUrls((prevState) => [...prevState, url]);
-
-              /*
-              db.collection("map")
-                .doc("link")
-                .add({
-                  map: url,
-                })
-                .then((docRef) => {
-                  console.log("Document written with ID: ", docRef.id);
-                })
-                .catch((error) => {
-                  console.error("Error adding document: ", error);
-                });*/
             });
         }
       );
@@ -214,7 +218,7 @@ function TokensPanel({ urls, setUrls, setMapTokens, tileSize }) {
         id: "char_" + keyVal,
         key: keyVal,
         dim: tokWidth,
-        isPanel: true,
+        partyCode: partyCode,
       });
 
       setPanelTokens([...newArr]);
@@ -248,6 +252,7 @@ function TokensPanel({ urls, setUrls, setMapTokens, tileSize }) {
                 isPanel={true}
                 triggerResize={triggerResize}
                 scrollDis={scrollDis}
+                isOwner={true}
               />
             ))}{" "}
         </div>
@@ -309,9 +314,11 @@ const TokenText = styled.div`
   font-size: 1.1em;
   text-align: center;
   padding: 1%;
+  z-index: 100;
 `;
 
 const Cloud = {
   fontSize: "10vh",
   width: "100%",
+  zIndex: "10",
 };

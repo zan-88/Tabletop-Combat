@@ -6,15 +6,18 @@ export default function useGridBounds(
   borderID,
   tileDim,
   setDeleteKey,
+  setChangeKey,
   setNewTokUrl = null,
   setMapTok = null,
   setCoord,
-  scrollDis = 0
+  scrollDis = 0,
+  isOwner,
+  socket
 ) {
   const [position, setPosition] = useState(
     setNewTokUrl
       ? { x: token.x, y: token.y }
-      : GridHelper.coordToMap({ x: token.x, y: token.y }, "grid", tileDim)
+      : GridHelper.coordToMap({ x: token.x, y: token.y }, borderID, tileDim)
   );
 
   let inMouse = { x: null, y: null };
@@ -67,7 +70,8 @@ export default function useGridBounds(
           x: Math.floor((e.clientX - x) / tileDim) * tileDim + x,
           y: Math.floor((e.clientY - y) / tileDim) * tileDim + y,
         };
-        setCoord(GridHelper.MapToCoord(loc, "grid", tileDim));
+        let coord = GridHelper.MapToCoord(loc, "grid", tileDim);
+        setCoord(coord);
         setPosition(loc);
         let temp = { url: "", pos: { x: 0, y: 0 }, key: -1 };
         if (setMapTok) {
@@ -79,6 +83,14 @@ export default function useGridBounds(
           setDeleteKey(token.key);
           return setMapTok(temp);
         }
+        if (setChangeKey) setChangeKey({ token: token, coord: coord });
+        socket.emit("token-change-pos", {
+          key: token.key,
+          x: coord.x,
+          y: coord.y,
+          url: token.url,
+          id: token.id,
+        });
       }
       document.body.removeEventListener("mousemove", move);
       document.body.removeEventListener("mouseup", up);
@@ -96,7 +108,8 @@ export default function useGridBounds(
 
       setPosition(pos);
     }
-    drag.addEventListener("mousedown", down);
+
+    if (isOwner) drag.addEventListener("mousedown", down);
 
     return () => {
       drag.removeEventListener("mousedown", down);

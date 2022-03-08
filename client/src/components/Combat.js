@@ -1,13 +1,12 @@
-import Tabs from "@material-ui/core/Tabs";
-import Tab from "@material-ui/core/Tab";
 import React, { useState, useEffect, useRef } from "react";
 import Adjust from "@mui/icons-material/Adjust";
 import Build from "@mui/icons-material/Build";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import SquareFootIcon from "@mui/icons-material/SquareFoot";
 import Map from "./Map";
 import TokensPanel from "./TokensPanel";
-import { storage, db } from "../firebase";
+import { storage } from "../firebase";
 import styled from "styled-components";
 import useDragFile from "../hooks/use-dragfile";
 import { useDropzone } from "react-dropzone";
@@ -15,12 +14,21 @@ import Tools from "./Tools";
 import Grid4x4Icon from "@mui/icons-material/Grid4x4";
 import GridTool from "./GridTool";
 
-import grid from "../images/grid.png";
-import draggable from "../Functions/draggable";
-import Token from "./Token";
+import * as GameRequest from "../Functions/gameRequest";
+import DMTabs from "./DMTabs";
 
-function Combat({ url, setUrl, urls, setUrls }) {
+function Combat({
+  url,
+  setUrl,
+  urls,
+  setUrls,
+  partyCode,
+  setPartyCode,
+  socket,
+}) {
   const [value, setValue] = useState(0);
+
+  const [isMap, setIsMap] = useState(false);
 
   const [image, setImage] = useState("");
 
@@ -31,7 +39,6 @@ function Combat({ url, setUrl, urls, setUrls }) {
   const [initDim, setInitDim] = useState({ w: 0, h: 0 });
   const [imgDim, setImgDim] = useState({ w: "", h: "" });
   const [isLoaded, setIsLoaded] = useState(false);
-  const [loc, setLoc] = useState({ x: 0, y: 0 });
   const [mapTokens, setMapTokens] = useState([]);
 
   const [tokens, setTokens] = useState([]);
@@ -120,6 +127,17 @@ function Combat({ url, setUrl, urls, setUrls }) {
     }
   }, [image]);
 
+  //NEXT STARTING POINT
+  useEffect(() => {
+    if (partyCode !== "") {
+      GameRequest.setMap({
+        partyCode: partyCode,
+        mapUrl: url,
+        gridVal: gridVal.current,
+      });
+    }
+  }, [partyCode]);
+
   const img = new Image();
 
   const handleChangeTab = (event, newValue) => {
@@ -147,21 +165,11 @@ function Combat({ url, setUrl, urls, setUrls }) {
           .getDownloadURL()
           .then((url) => {
             setUrl(url);
+            setIsMap(true);
             img.src = url;
             img.onload = function () {
               setIsLoaded(true);
             };
-            db.collection("map")
-              .doc("link")
-              .set({
-                map: url,
-              })
-              .then((docRef) => {
-                console.log("Document written with ID: ", docRef.id);
-              })
-              .catch((error) => {
-                console.error("Error adding document: ", error);
-              });
           });
       }
     );
@@ -176,57 +184,21 @@ function Combat({ url, setUrl, urls, setUrls }) {
           height: "100%",
         }}
       >
-        <div
-          id="selection"
-          style={{
-            flexBasis: "15%",
-            display: "flex",
-            flexDirection: "column",
-            backgroundColor: "#940a0a",
-            zIndex: "1000",
-          }}
-        >
-          <Tabs
-            style={{ backgroundColor: "black", zIndex: "1000" }}
-            variant="scrollable"
-            value={value}
-            onChange={handleChangeTab}
-            aria-label="simple tabs example"
-          >
-            <Tab
-              style={{ minWidth: "33%", zIndex: "1000" }}
-              icon={<Grid4x4Icon style={{ color: "white" }} />}
-            />
-            <Tab
-              icon={<AccountCircleIcon style={{ color: "white" }} />}
-              style={{ minWidth: "33%", zIndex: "1000" }}
-            />
-            <Tab
-              icon={<Build style={{ color: "white" }} />}
-              style={{ minWidth: "33%", zIndex: "1000" }}
-            />
-          </Tabs>
-          <div style={{ display: value === 0 ? "inline" : "none" }}>
-            <GridTool
-              setGrid={setGrid}
-              setTile={setTileSize}
-              gridVal={gridVal}
-            />
-          </div>
-          <div
-            style={{ height: "100%", display: value === 1 ? "inline" : "none" }}
-          >
-            <TokensPanel
-              urls={urls}
-              setUrls={setUrls}
-              setMapTokens={setMapTokens}
-              tileSize={tileSize}
-            />
-          </div>
-          <div style={{ display: value === 2 ? "inline" : "none" }}>
-            <Tools />
-          </div>
-        </div>
+        <DMTabs
+          value={value}
+          handleChangeTab={handleChangeTab}
+          setGrid={setGrid}
+          setTileSize={setTileSize}
+          gridVal={gridVal}
+          partyCode={partyCode}
+          setPartyCode={setPartyCode}
+          isMap={isMap}
+          urls={urls}
+          setUrls={setUrls}
+          setMapTokens={setMapTokens}
+          tileSize={tileSize}
+          socket={socket}
+        />
         {url === "" ? (
           <MapSection>
             <MapBorder id="dragArea" {...getRootProps()}>
@@ -238,15 +210,16 @@ function Combat({ url, setUrl, urls, setUrls }) {
         ) : (
           <Map
             imageUrl={url}
-            loc={loc}
             dim={imgDim}
             fitImage={fitImage}
-            setLoc={setLoc}
             isLoaded={isLoaded}
             gridVal={grid}
             mapTokens={mapTokens}
             setMapTokens={setMapTokens}
             tileSize={tileSize}
+            socket={socket}
+            partyCode={partyCode}
+            isOwner={true}
           />
         )}
       </div>
