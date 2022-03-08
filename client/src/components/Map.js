@@ -8,7 +8,6 @@ import * as GridHelper from "../Functions/GridMapConv";
 
 export default function Map({
   imageUrl,
-  val,
   dim,
   fitImage,
   isLoaded,
@@ -23,9 +22,12 @@ export default function Map({
   setPlayerToken = null,
 }) {
   const [deleteKey, setDeleteKey] = useState("");
+  const [changeKey, setChangeKey] = useState({ token: null, coord: null });
   const notInitial = useRef(false);
   const [loc, setLoc] = useState({ x: 0, y: 0 });
   const mapTokRef = useRef(mapTokens);
+  const playerTokRef = useRef({ key: -1 });
+  const [extToks, setExtToks] = useState(null);
 
   useEffect(() => {
     const placeToken = (sockTok) => {
@@ -38,43 +40,40 @@ export default function Map({
         dim: tileSize,
         partyCode: partyCode,
       };
+      removeToken(sockTok.key);
       setMapTokens((prev) => [...prev, token]);
-      console.log("fuck");
     };
 
     const changeToken = (sockTok) => {
       let newArr = mapTokRef.current;
-      console.log(mapTokRef.current);
       let token = {
         x: sockTok.x,
         y: sockTok.y,
         url: sockTok.url,
         id: "char_" + sockTok.key,
         key: sockTok.key,
-        dim: tileSize,
+        dim: sockTok.tileSize,
         partyCode: partyCode,
       };
 
-      if (playerToken) {
+      if (playerTokRef.current.key === sockTok.key) {
+        setPlayerToken(null);
         setPlayerToken(token);
       } else {
         newArr = newArr.filter((tok) => {
-          console.log(tok.x + " | " + sockTok.x);
-          console.log(tok.key !== sockTok.key);
           return tok.key !== sockTok.key;
         });
         newArr.push(token);
         setMapTokens([]);
         setMapTokens(newArr);
       }
-      console.log("moved token");
     };
 
     const removeToken = (remKey) => {
       let newArr = mapTokRef.current;
 
-      if (playerToken) {
-        if (playerToken.key === remKey) setPlayerToken(null);
+      if (playerTokRef.current.key === remKey) {
+        setPlayerToken(null);
       } else {
         newArr = newArr.filter((tok) => {
           return tok.key !== remKey;
@@ -94,15 +93,41 @@ export default function Map({
     };
   }, [socket]);
 
-  //Delete Token effect
+  //Update Map Tokens effect
   useEffect(() => {
     if (notInitial.current) {
       let newArr = mapTokens;
       newArr = newArr.filter(function (tok) {
-        return tok.key !== deleteKey;
+        return tok.key !== changeKey.token.key;
       });
+
+      let token = {
+        x: changeKey.coord.x,
+        y: changeKey.coord.y,
+        url: changeKey.token.url,
+        id: "char_" + changeKey.token.key,
+        key: changeKey.token.key,
+        dim: changeKey.token.tileSize,
+        partyCode: partyCode,
+      };
+      newArr.push(token);
       setMapTokens([...newArr]);
-      console.log(deleteKey);
+    }
+  }, [changeKey]);
+
+  //Delete Token effect
+  useEffect(() => {
+    if (notInitial.current) {
+      if (playerTokRef.current.key === deleteKey) {
+        setPlayerToken(null);
+      } else {
+        let newArr = mapTokens;
+        newArr = newArr.filter(function (tok) {
+          return tok.key !== deleteKey;
+        });
+        setMapTokens([...newArr]);
+      }
+
       GameRequest.deleteToken(deleteKey);
 
       socket.emit("delete-token-map", deleteKey);
@@ -125,7 +150,49 @@ export default function Map({
     });
 
     window.addEventListener("resize", fitImage);
+
+    if (isLoaded) {
+      async function fetchTokens() {
+        await GameRequest.getTokens(
+          {
+            params: { partyCode: partyCode },
+          },
+          setExtToks
+        );
+      }
+
+      fetchTokens();
+    }
   }, [isLoaded]);
+
+  useEffect(() => {
+    playerTokRef.current = playerToken ? playerToken : { key: -1 };
+  }, [playerToken]);
+
+  useEffect(() => {
+    let newArr = [];
+    if (extToks) {
+      extToks.forEach((ext) => {
+        let coordPos = ext.location;
+        console.log(coordPos);
+        let token = {
+          x: coordPos.x,
+          y: coordPos.y,
+          url: ext.imageUrl,
+          id: ext.token_id,
+          key: `${ext.token_key}`,
+          dim: tileSize,
+          partyCode: ext.partyCode,
+        };
+        newArr.push(token);
+      });
+      setMapTokens((prev) => [...prev, ...newArr]);
+    }
+  }, [extToks]);
+
+  useEffect(() => {
+    console.log(mapTokens);
+  }, [mapTokens]);
 
   return (
     <>
@@ -196,6 +263,7 @@ export default function Map({
             key={token.key}
             tileSize={tileSize}
             token={token}
+            setChangeKey={setChangeKey}
             setDeleteKey={setDeleteKey}
             setNewTokUrl={undefined}
             setMapTok={null}

@@ -23,7 +23,6 @@ export default function PlayerCombat({
 
   useEffect(() => {
     if (party) {
-      console.log(party);
       setUrl(party.mapUrl);
       imag.src = party.mapUrl;
       imag.onload = function () {
@@ -31,24 +30,6 @@ export default function PlayerCombat({
       };
     }
   }, [party]);
-
-  useEffect(() => {
-    if (extToks) {
-      extToks.forEach((ext) => {
-        let coordPos = ext.location;
-        let token = {
-          x: coordPos.x,
-          y: coordPos.y,
-          url: ext.imageUrl,
-          id: ext.token_id,
-          key: `${ext.token_key}`,
-          dim: tileSize,
-          partyCode: ext.partyCode,
-        };
-        setMapTokens((prev) => [...prev, token]);
-      });
-    }
-  }, [extToks]);
 
   function fitImage() {
     //IMAGE FITTING FUNCTIONALITY
@@ -68,7 +49,6 @@ export default function PlayerCombat({
       setImgDim({ w: `${wVal}px`, h: `${container.offsetHeight}px` });
       setInitDim({ w: wVal, h: container.offsetHeight });
     }
-    console.log(party.gridVal);
 
     //GRID FITTING FUNCTIONALITY
     if (img !== null) {
@@ -111,10 +91,10 @@ export default function PlayerCombat({
         }}
       >
         <PlayerTools
-          url={playerInfo.playerUrl}
+          playerInfo={playerInfo}
           setPlayerToken={setPlayerToken}
           tileSize={tileSize}
-          partyCode={playerInfo.partyCode}
+          socket={socket}
         />
       </div>
 

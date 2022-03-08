@@ -1,4 +1,5 @@
 const express = require("express");
+const cors = require("cors");
 const http = require("http");
 const dotenv = require("dotenv").config();
 const { errorHandler } = require("./middleware/errorMiddleware");
@@ -25,13 +26,15 @@ app.use("/api/map", require("./routes/mapRoutes"));
 
 app.use(errorHandler);
 
+app.use(cors());
+
 const server = http.createServer(app);
 
 const { Server } = require("socket.io");
 
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:3000", "http://192.168.86.46:3000"],
+    origin: ["http://localhost:3000", "http://192.168.0.161:3000"],
     methods: ["GET", "POST"],
     credentials: true,
   },

@@ -10,7 +10,7 @@ import Token from "./Token";
 import * as GridHelper from "../Functions/GridMapConv";
 import * as GameRequest from "../Functions/gameRequest";
 
-function PlayerTools({ url, setPlayerToken, tileSize, partyCode }) {
+function PlayerTools({ playerInfo, setPlayerToken, tileSize, socket }) {
   const notInitial = useRef(false);
 
   document.body.style.overflow = "hidden";
@@ -30,7 +30,7 @@ function PlayerTools({ url, setPlayerToken, tileSize, partyCode }) {
   const [mapTok, setMapTok] = useState(null);
 
   useEffect(() => {
-    newToken(url);
+    newToken(playerInfo.playerUrl);
     let panel = document.getElementById("tokenBar");
     panel.addEventListener("wheel", function (e) {
       let panelLoc = document.getElementById("tokenBar");
@@ -50,23 +50,33 @@ function PlayerTools({ url, setPlayerToken, tileSize, partyCode }) {
     });
   }, []);
 
+  function TransferToken(mapTok) {
+    let coordPos = GridHelper.MapToCoord(mapTok.pos, "grid", tileSize);
+    let token = {
+      x: coordPos.x,
+      y: coordPos.y,
+      url: mapTok.url,
+      id: `${playerInfo.partyCode}(${playerInfo.playerName})${mapTok.key}`,
+      key: `${playerInfo.partyCode}(${playerInfo.playerName})${mapTok.key}`,
+      dim: tileSize,
+      partyCode: playerInfo.partyCode,
+    };
+    setPlayerToken(token);
+    if (mapTok.key !== -1) GameRequest.setToken(token);
+    newToken(mapTok.url);
+    setMapTok(null);
+  }
+
   //Transfer token to map
   useEffect(() => {
     if (mapTok !== null && mapTok.key !== -1) {
-      let coordPos = GridHelper.MapToCoord(mapTok.pos, "grid", tileSize);
-      let token = {
-        x: coordPos.x,
-        y: coordPos.y,
+      TransferToken(mapTok);
+      let coord = GridHelper.MapToCoord(mapTok.pos, "grid", tileSize);
+      socket.emit("add-token-map", {
+        key: `${playerInfo.partyCode}(${playerInfo.playerName})${mapTok.key}`,
+        position: coord,
         url: mapTok.url,
-        id: "char_" + mapTok.key,
-        key: `${partyCode}(P)${mapTok.key}`,
-        dim: tileSize,
-        partyCode: partyCode,
-      };
-      setPlayerToken(token);
-      if (mapTok.key !== -1) GameRequest.setToken(token);
-      newToken(mapTok.url);
-      setMapTok(null);
+      });
     }
   }, [mapTok]);
 
@@ -110,7 +120,7 @@ function PlayerTools({ url, setPlayerToken, tileSize, partyCode }) {
         id: "char_" + keyVal,
         key: keyVal,
         dim: tokWidth,
-        partyCode: partyCode,
+        partyCode: playerInfo.partyCode,
       });
 
       setPanelTokens([...newArr]);

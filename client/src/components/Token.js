@@ -7,6 +7,7 @@ export default function Token({
   tileSize,
   token,
   setDeleteKey,
+  setChangeKey = null,
   setNewTokUrl,
   setMapTok,
   isPanel = false,
@@ -26,6 +27,7 @@ export default function Token({
     "grid",
     tileSize,
     setDeleteKey,
+    setChangeKey,
     setNewTokUrl,
     setMapTok,
     setCoord,
@@ -52,6 +54,7 @@ export default function Token({
         key: token.key,
         x: coord.x,
         y: coord.y,
+        tileSize: tileSize,
       });
     }
     setNotInitial(true);

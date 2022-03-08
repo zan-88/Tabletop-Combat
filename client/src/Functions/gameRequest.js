@@ -2,7 +2,10 @@ import axios from "axios";
 
 export async function getTokens(code, setTemp) {
   try {
-    const response = await axios.get("http://localhost:5000/api/tokens", code);
+    const response = await axios.get(
+      "http://192.168.0.161:5000/api/tokens",
+      code
+    );
     setTemp(response.data);
     console.log("TOKEN GOT" + response.data[0]);
     return response.data;
@@ -14,7 +17,7 @@ export async function getTokens(code, setTemp) {
 
 export async function setToken(token) {
   await axios
-    .post("http://localhost:5000/api/tokens", token)
+    .post("http://192.168.0.161:5000/api/tokens", token)
     .catch(function (error) {
       if (error.response) {
         console.log(error.response);
@@ -24,7 +27,7 @@ export async function setToken(token) {
 
 export async function deleteAllTokens() {
   await axios
-    .delete("http://localhost:5000/api/tokens")
+    .delete("http://192.168.0.161:5000/api/tokens")
     .catch(function (error) {
       if (error.response) {
         console.log(error.response);
@@ -33,9 +36,8 @@ export async function deleteAllTokens() {
 }
 
 export async function updateToken(token) {
-  console.log("updating");
   await axios
-    .put(`http://localhost:5000/api/tokens/${token.key}`, token)
+    .put(`http://192.168.0.161:5000/api/tokens/${token.key}`, token)
     .catch(function (error) {
       if (error.response) {
         console.log(error.response);
@@ -45,10 +47,7 @@ export async function updateToken(token) {
 
 export async function deleteToken(key) {
   await axios
-    .delete(`http://localhost:5000/api/tokens/${key}`)
-    .then((response) => {
-      console.log("ahh" + response);
-    })
+    .delete(`http://192.168.0.161:5000/api/tokens/${key}`)
     .catch(function (error) {
       if (error.response) {
         console.log(error.response);
@@ -59,7 +58,7 @@ export async function deleteToken(key) {
 export async function getMap(code, setParty, setIsLoaded) {
   try {
     console.log("getting map");
-    const response = await axios.get(`http://localhost:5000/api/map`, code);
+    const response = await axios.get(`http://192.168.0.161:5000/api/map`, code);
     console.log("got map");
     setParty(response.data[0]);
     setIsLoaded(true);
@@ -67,13 +66,13 @@ export async function getMap(code, setParty, setIsLoaded) {
     return response.data[0];
   } catch (error) {
     console.log("ERROR");
-    console.log(error.response);
+    console.log(error);
   }
 }
 
 export async function setMap(map) {
   await axios
-    .post("http://localhost:5000/api/map", map)
+    .post("http://192.168.0.161:5000/api/map", map)
     .catch(function (error) {
       if (error.response) {
         console.log(error.response);

@@ -46,6 +46,7 @@ export default function GridTool({
       if (imgH === contH) {
         let offset = imgH;
         let sps = offset / val;
+        //sps = Number.parseFloat(sps.toFixed(4));
         let width = 50 * sps; //50 might seem magic but it is the width of the grid img divided by the size in pixels of one square
         setGrid({ w: width, h: 0 });
         let temp;
@@ -64,6 +65,7 @@ export default function GridTool({
       } else {
         let offset = imgW;
         let sps = offset / val;
+        //sps = Number.parseFloat(sps.toFixed(4));
         let dim = 50 * sps; //50 might seem magic but it is the width of the grid img divided by the size in pixels of one square
         setGrid({ w: dim, h: 0 });
         let temp;

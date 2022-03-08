@@ -16,14 +16,13 @@ function App() {
   const [urls, setUrls] = useState([]);
 
   const [party, setParty] = useState(null);
-  const [extToks, setExtToks] = useState(null);
 
   const [playerInfo, setPlayerInfo] = useState(null);
 
   const [socket, setSocket] = useState(null);
 
   useEffect(() => {
-    const newSocket = io("http://localhost:5000", {
+    const newSocket = io("http://192.168.0.161:5000", {
       withCredentials: true,
       transports: ["websocket"],
     });
@@ -69,7 +68,6 @@ function App() {
           setPlayerInfo={setPlayerInfo}
           setValue={setValue}
           setParty={setParty}
-          setExtToks={setExtToks}
         />
       )}
 
@@ -80,7 +78,6 @@ function App() {
           socket={socket}
           partyCode={partyCode}
           party={party}
-          extToks={extToks}
         />
       )}
     </div>

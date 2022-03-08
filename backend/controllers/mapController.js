@@ -18,7 +18,10 @@ const getMap = (req, res) => {
       values: [req.query.partyCode],
     },
     function (error, results, fields) {
-      if (error) console.log(error);
+      if (error) {
+        console.log(error);
+        res.status(404).json(error);
+      }
       console.log("CODE: " + req.query.partyCode);
       res.status(200).json(results);
     }

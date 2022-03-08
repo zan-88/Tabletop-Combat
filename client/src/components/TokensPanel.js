@@ -99,7 +99,7 @@ function TokensPanel({
       x: coordPos.x,
       y: coordPos.y,
       url: mapTok.url,
-      id: "char_" + mapTok.key,
+      id: `${partyCode}(DM)${mapTok.key}`,
       key: `${partyCode}(DM)${mapTok.key}`,
       dim: tileSize,
       partyCode: partyCode,

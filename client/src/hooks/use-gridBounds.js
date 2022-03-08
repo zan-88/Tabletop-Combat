@@ -6,6 +6,7 @@ export default function useGridBounds(
   borderID,
   tileDim,
   setDeleteKey,
+  setChangeKey,
   setNewTokUrl = null,
   setMapTok = null,
   setCoord,
@@ -16,7 +17,7 @@ export default function useGridBounds(
   const [position, setPosition] = useState(
     setNewTokUrl
       ? { x: token.x, y: token.y }
-      : GridHelper.coordToMap({ x: token.x, y: token.y }, "grid", tileDim)
+      : GridHelper.coordToMap({ x: token.x, y: token.y }, borderID, tileDim)
   );
 
   let inMouse = { x: null, y: null };
@@ -80,11 +81,10 @@ export default function useGridBounds(
             key: token.key,
           };
           setDeleteKey(token.key);
-          console.log("del");
           return setMapTok(temp);
         }
-        console.log("moving token");
-        socket.volatile.emit("token-change-pos", {
+        if (setChangeKey) setChangeKey({ token: token, coord: coord });
+        socket.emit("token-change-pos", {
           key: token.key,
           x: coord.x,
           y: coord.y,

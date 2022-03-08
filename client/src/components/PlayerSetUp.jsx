@@ -9,12 +9,7 @@ import { storage } from "../firebase";
 import useDragFile from "../hooks/use-dragfile";
 import * as GameRequest from "../Functions/gameRequest";
 
-export default function PlayerSetUp({
-  setPlayerInfo,
-  setValue,
-  setParty,
-  setExtToks,
-}) {
+export default function PlayerSetUp({ setPlayerInfo, setValue, setParty }) {
   const [token, setToken] = useState(null);
   const [url, setUrl] = useState("");
 
@@ -39,23 +34,12 @@ export default function PlayerSetUp({
   }, [token]);
 
   async function fetchMap() {
-    console.log("map");
     await GameRequest.getMap(
       {
         params: { partyCode: partyCode },
       },
       setParty,
       setIsLoaded
-    );
-  }
-
-  async function fetchTokens() {
-    console.log("tokens");
-    await GameRequest.getTokens(
-      {
-        params: { partyCode: partyCode },
-      },
-      setExtToks
     );
   }
 
@@ -86,14 +70,11 @@ export default function PlayerSetUp({
       partyCode: partyCode,
       playerName: userName,
     });
-    console.log("fetching...");
-    fetchTokens();
     fetchMap();
   }
 
   useEffect(() => {
     if (isLoaded) {
-      console.log("set");
       setValue(3);
     }
   }, [isLoaded]);
