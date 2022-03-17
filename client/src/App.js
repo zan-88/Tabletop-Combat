@@ -22,7 +22,7 @@ function App() {
   const [socket, setSocket] = useState(null);
 
   useEffect(() => {
-    const newSocket = io("http://192.168.0.161:5000", {
+    const newSocket = io("http://reroute.hasted-backend.epizy.com", {
       withCredentials: true,
       transports: ["websocket"],
     });

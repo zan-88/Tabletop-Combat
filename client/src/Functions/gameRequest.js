@@ -3,7 +3,7 @@ import axios from "axios";
 export async function getTokens(code, setTemp) {
   try {
     const response = await axios.get(
-      "http://192.168.0.161:5000/api/tokens",
+      "http://ec2-3-22-247-38.us-east-2.compute.amazonaws.com/api/tokens",
       code
     );
     setTemp(response.data);
@@ -17,7 +17,10 @@ export async function getTokens(code, setTemp) {
 
 export async function setToken(token) {
   await axios
-    .post("http://192.168.0.161:5000/api/tokens", token)
+    .post(
+      "http://ec2-3-22-247-38.us-east-2.compute.amazonaws.com/api/tokens",
+      token
+    )
     .catch(function (error) {
       if (error.response) {
         console.log(error.response);
@@ -27,7 +30,7 @@ export async function setToken(token) {
 
 export async function deleteAllTokens() {
   await axios
-    .delete("http://192.168.0.161:5000/api/tokens")
+    .delete("http://ec2-3-22-247-38.us-east-2.compute.amazonaws.com/api/tokens")
     .catch(function (error) {
       if (error.response) {
         console.log(error.response);
@@ -37,7 +40,10 @@ export async function deleteAllTokens() {
 
 export async function updateToken(token) {
   await axios
-    .put(`http://192.168.0.161:5000/api/tokens/${token.key}`, token)
+    .put(
+      `http://ec2-3-22-247-38.us-east-2.compute.amazonaws.com/api/tokens/${token.key}`,
+      token
+    )
     .catch(function (error) {
       if (error.response) {
         console.log(error.response);
@@ -47,7 +53,9 @@ export async function updateToken(token) {
 
 export async function deleteToken(key) {
   await axios
-    .delete(`http://192.168.0.161:5000/api/tokens/${key}`)
+    .delete(
+      `http://ec2-3-22-247-38.us-east-2.compute.amazonaws.com/api/tokens/${key}`
+    )
     .catch(function (error) {
       if (error.response) {
         console.log(error.response);
@@ -58,7 +66,10 @@ export async function deleteToken(key) {
 export async function getMap(code, setParty, setIsLoaded) {
   try {
     console.log("getting map");
-    const response = await axios.get(`http://192.168.0.161:5000/api/map`, code);
+    const response = await axios.get(
+      `http://ec2-3-22-247-38.us-east-2.compute.amazonaws.com/api/map`,
+      code
+    );
     console.log("got map");
     setParty(response.data[0]);
     setIsLoaded(true);
@@ -72,7 +83,7 @@ export async function getMap(code, setParty, setIsLoaded) {
 
 export async function setMap(map) {
   await axios
-    .post("http://192.168.0.161:5000/api/map", map)
+    .post("http://ec2-3-22-247-38.us-east-2.compute.amazonaws.com/api/map", map)
     .catch(function (error) {
       if (error.response) {
         console.log(error.response);
