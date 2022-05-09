@@ -16,6 +16,7 @@ import GridTool from "./GridTool";
 
 import * as GameRequest from "../Functions/gameRequest";
 import DMTabs from "./DMTabs";
+import { rgbToHex } from "@material-ui/core";
 
 function Combat({
   url,
@@ -26,8 +27,6 @@ function Combat({
   setPartyCode,
   socket,
 }) {
-  const [value, setValue] = useState(0);
-
   const [isMap, setIsMap] = useState(false);
 
   const [image, setImage] = useState("");
@@ -45,30 +44,25 @@ function Combat({
   const [tileSize, setTileSize] = useState(44);
   const gridVal = useRef(20);
 
+  const [currentToken, setCurrentToken] = useState({
+    x: 0,
+    y: 0,
+    url: "",
+    id: ``,
+    key: ``,
+    dim: tileSize,
+    partyCode: partyCode,
+    size: { w: 1, h: 1 },
+    colour: { r: 0, g: 0, b: 0 },
+  });
+
   useDragFile("dragArea");
 
   //stores id for grid and changes if grid movement is not required
   const [grid, setGrid] = useState({ w: 2000, h: 1000 });
 
-  // function tokenHandle(url) {
-  //   let src = url;
-  //   let val = tokens.length;
-  //   let token = document.getElementById("token_" + val);
-
-  //   console.log(token.offsetLeft + " | " + token.offsetTop);
-  //   setTokens([
-  //     ...tokens,
-  //     {
-  //       x: token.offsetLeft,
-  //       y: token.offsetTop,
-  //       url: src,
-  //       id: "char_" + val,
-  //       key: val,
-  //       dim: token.offsetWidth,
-  //     },
-  //   ]);
-  // }
   function fitImage() {
+    console.log("Nice");
     //IMAGE FITTING FUNCTIONALITY
     let container = document.getElementById("mapBack");
     let img = document.getElementById("ugh");
@@ -98,6 +92,7 @@ function Combat({
         let width = 50 * sps; //50 might seem magic but it is the width of the grid img divided by the size in pixels of one square
         setGrid({ w: width, h: 0 });
         setTileSize(sps);
+        console.log("test");
       } else {
         let offset = imgW;
         let sps = offset / gridVal.current;
@@ -140,10 +135,6 @@ function Combat({
 
   const img = new Image();
 
-  const handleChangeTab = (event, newValue) => {
-    setValue(newValue);
-  };
-
   const handleChangeMap = (e) => {
     if (e.target.files[0]) {
       setImage(e.target.files[0]);
@@ -185,8 +176,6 @@ function Combat({
         }}
       >
         <DMTabs
-          value={value}
-          handleChangeTab={handleChangeTab}
           setGrid={setGrid}
           setTileSize={setTileSize}
           gridVal={gridVal}

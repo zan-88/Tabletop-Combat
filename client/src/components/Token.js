@@ -11,7 +11,6 @@ export default function Token({
   setNewTokUrl,
   setMapTok,
   isPanel = false,
-  triggerResize = 0,
   scrollDis = 0,
   isOwner,
   socket,
@@ -72,7 +71,7 @@ export default function Token({
         backgroundRepeat: "no-repeat",
         width: setMapTok ? token.dim : `${tileSize}px`,
         height: setMapTok ? token.dim : `${tileSize}px`,
-        top: `${pos.y - triggerResize}px`,
+        top: `${pos.y}px`,
         left: `${pos.x}px`,
       }}
     />

@@ -40,7 +40,15 @@ export default function Map({
         dim: tileSize,
         partyCode: partyCode,
       };
-      removeToken(sockTok.key);
+      let name = sockTok.key.substring(
+        sockTok.key.indexOf("(") + 1,
+        sockTok.key.lastIndexOf(")")
+      );
+      if (name !== "DM") {
+        replacePlayer(name);
+      } else {
+        removeToken(sockTok.key);
+      }
       setMapTokens((prev) => [...prev, token]);
     };
 
@@ -67,6 +75,16 @@ export default function Map({
         setMapTokens([]);
         setMapTokens(newArr);
       }
+    };
+
+    const replacePlayer = (name) => {
+      let newArr = mapTokRef.current;
+
+      newArr = newArr.filter((tok) => {
+        return !tok.key.includes(name);
+      });
+
+      setMapTokens(newArr);
     };
 
     const removeToken = (remKey) => {

@@ -109,9 +109,9 @@ export default function PlayerSetUp({ setPlayerInfo, setValue, setParty }) {
             <TokenDrag id="tokenDrag">
               <TokenBorder id="tokenArea" {...getRootProps()}>
                 <Form.Control
+                  type="file"
                   style={{ width: "100%" }}
                   {...getInputProps()}
-                  required
                 />
                 {url === "" ? (
                   <div>
@@ -135,7 +135,7 @@ export default function PlayerSetUp({ setPlayerInfo, setValue, setParty }) {
             </TokenDrag>
           </PlayerTokenSection>
         </Form.Group>
-        <Button type="submit" variant="outline-dark">
+        <Button type="submit" variant="outline-dark" disabled={url === ""}>
           Enter Party
         </Button>
       </Form>

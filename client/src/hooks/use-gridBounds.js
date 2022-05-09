@@ -100,10 +100,7 @@ export default function useGridBounds(
       e.preventDefault();
       const pos = {
         x: offset.x + e.clientX - inMouse.x,
-        y:
-          scrollDis !== 0
-            ? offset.y + e.clientY - inMouse.y + scrollDis.current
-            : offset.y + e.clientY - inMouse.y,
+        y: offset.y + e.clientY - inMouse.y,
       };
 
       setPosition(pos);

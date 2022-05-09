@@ -21,14 +21,23 @@ function App() {
 
   const [socket, setSocket] = useState(null);
 
+  let dev = "http://localhost:5000";
+  let prod = "https://ns1.hasted-backend.epizy.com";
+
   useEffect(() => {
-    const newSocket = io("http://reroute.hasted-backend.epizy.com", {
+    const newSocket = io(dev, {
       withCredentials: true,
       transports: ["websocket"],
     });
 
     setSocket(newSocket);
+    newSocket.on("connect_error", (err) => {
+      console.log(`connect_error due to ${err.message}`);
+    });
     return () => {
+      newSocket.off("connect_error", (err) => {
+        console.log(`connect_error due to ${err.message}`);
+      });
       newSocket.close();
       socket.close();
     };

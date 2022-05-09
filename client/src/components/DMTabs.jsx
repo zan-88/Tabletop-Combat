@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
 import Adjust from "@mui/icons-material/Adjust";
@@ -8,10 +8,9 @@ import SquareFootIcon from "@mui/icons-material/SquareFoot";
 import GridTool from "./GridTool";
 import TokensPanel from "./TokensPanel";
 import Tools from "./Tools";
+import TokenFocus from "./TokenFocus";
 
 export default function DMTabs({
-  value,
-  handleChangeTab,
   setGrid,
   setTileSize,
   gridVal,
@@ -24,6 +23,13 @@ export default function DMTabs({
   tileSize,
   socket,
 }) {
+  const [value, setValue] = useState(0);
+
+  const [newToken, setNewToken] = useState("");
+
+  const handleChangeTab = (event, newValue) => {
+    setValue(newValue);
+  };
   return (
     <div
       id="selection"
@@ -33,6 +39,8 @@ export default function DMTabs({
         flexDirection: "column",
         backgroundColor: "#940a0a",
         zIndex: "1000",
+        width: "inherit",
+        height: "inherit",
       }}
     >
       <Tabs
@@ -67,16 +75,36 @@ export default function DMTabs({
       </div>
       <div style={{ height: "100%", display: value === 1 ? "inline" : "none" }}>
         <TokensPanel
+          setValue={setValue}
           urls={urls}
           setUrls={setUrls}
           setMapTokens={setMapTokens}
           tileSize={tileSize}
           partyCode={partyCode}
           socket={socket}
+          setNewToken={setNewToken}
         />
       </div>
       <div style={{ display: value === 2 ? "inline" : "none" }}>
         <Tools />
+      </div>
+      <div
+        style={{
+          display: value === 3 ? "inline" : "none",
+          width: "inherit",
+          height: "inherit",
+        }}
+      >
+        <TokenFocus
+          token={newToken}
+          setMapTokens={setMapTokens}
+          tileSize={tileSize}
+          partyCode={partyCode}
+          socket={socket}
+        />
+      </div>
+      <div style={{ display: value === 5 ? "inline" : "none" }}>
+        <TokenFocus />
       </div>
     </div>
   );
