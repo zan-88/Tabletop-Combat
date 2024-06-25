@@ -51,7 +51,6 @@ io.on("connection", (socket) => {
     if (socket.connected) {
       socket.broadcast.emit("palce-token-map", sockTok);
     }
-    console.log("fuck");
   });
 
   socket.on("token-change-pos", (newTok) => {
